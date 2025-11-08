@@ -32,17 +32,17 @@ export default function Navbar() {
 
 const styles = {
   navbar: {
-    backgroundColor: 'rgba(255, 255, 255, 0.64)', // very transparent
+    backgroundColor: 'rgba(255, 255, 255, 0.64)', 
     padding: '20px 30px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
     margin: '20px',
     borderRadius: '15px',
-    boxShadow: '0 8px 24px rgba(0,0,0,0.1)', // softer shadow for depth
-    backdropFilter: 'blur(20px) saturate(180%)', // blur + slight saturation
-    WebkitBackdropFilter: 'blur(20px) saturate(180%)', // for Safari
-    border: '1px solid rgba(255, 255, 255, 0.3)', // soft glass edge
+    boxShadow: '0 8px 24px rgba(0,0,0,0.1)', 
+    backdropFilter: 'blur(20px) saturate(180%)', 
+    WebkitBackdropFilter: 'blur(20px) saturate(180%)', 
+    border: '1px solid rgba(255, 255, 255, 0.3)', 
     position: 'fixed',
     top: 0,
     left: 0,

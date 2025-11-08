@@ -4,7 +4,6 @@ export default function Footer() {
   return (
     <footer style={styles.footer}>
       <div style={styles.container}>
-        {/* First column */}
         <div style={styles.section}>
           <h4 style={styles.title}>About Meditrack+</h4>
           <p style={styles.text}>
@@ -13,7 +12,6 @@ export default function Footer() {
           </p>
         </div>
 
-        {/* Second column */}
         <div style={styles.section}>
           <h4 style={styles.title}>Quick Links</h4>
           <ul style={styles.list}>
@@ -24,7 +22,6 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Third column */}
         <div style={styles.section}>
           <h4 style={styles.title}>Contact</h4>
           <p style={styles.text}>Email: support@meditrackplus.com</p>
@@ -41,8 +38,8 @@ export default function Footer() {
 
 const styles = {
   footer: {
-    backgroundColor: "#00B4D8", // Meditrack+ blue
-    color: "#fff", // text changed to white
+    backgroundColor: "#00B4D8", 
+    color: "#fff", 
     padding: "40px 20px 20px 20px",
     fontFamily: "Arial, sans-serif",
     marginTop: "40px",
@@ -63,15 +60,15 @@ const styles = {
     fontSize: "1.1rem",
     marginBottom: "10px",
     fontWeight: "bold",
-    borderBottom: "2px solid #fff", // border also white
+    borderBottom: "2px solid #fff", 
     display: "inline-block",
     paddingBottom: "3px",
-    color: "#fff", // title white
+    color: "#fff", 
   },
   text: {
     fontSize: "0.9rem",
     lineHeight: "1.6",
-    color: "#fff", // text white
+    color: "#fff", 
   },
   list: {
     listStyle: "none",
@@ -82,12 +79,12 @@ const styles = {
     marginBottom: "8px",
     cursor: "pointer",
     transition: "0.2s",
-    color: "#fff", // list item white
+    color: "#fff", 
   },
   bottom: {
     textAlign: "center",
     marginTop: "30px",
     fontSize: "0.85rem",
-    color: "#fff", // bottom text white
+    color: "#fff", 
   },
 };

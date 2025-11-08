@@ -1,4 +1,3 @@
-// Pages/home.jsx
 import React from "react";
 
 export default function Home() {
@@ -11,7 +10,7 @@ export default function Home() {
         <p style={styles.subText}>
           Search, locate, and connect with pharmacies near you.
         </p>
-        <button style={styles.ctaButton}>Get Started</button>
+        <button style={styles.ctaButton}>Start Searching</button>
       </div>
     </div>
   );
@@ -23,7 +22,7 @@ const styles = {
       "url('https://t4.ftcdn.net/jpg/03/08/02/89/360_F_308028924_YwjqVGzauey7GfmckScMtIkSPJAVNkll.jpg')",
     backgroundSize: "cover",
     backgroundPosition: "center",
-    height: "90vh", // almost full viewport height
+    height: "92vh",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -40,13 +39,13 @@ const styles = {
     maxWidth: "800px",
   },
   mainText: {
-    fontSize: "2.5rem",
+    fontSize: "3rem",
     fontWeight: "bold",
     marginBottom: "20px",
     color: "#202020",
   },
   subText: {
-    fontSize: "1.2rem",
+    fontSize: "1.5rem",
     marginBottom: "30px",
     color: "#202020",
   },
