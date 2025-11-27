@@ -24,19 +24,15 @@ const categoryIcons = {
 
 export default function SearchBar() {
   const [query, setQuery] = useState("");
-  // State to hold search results (products currently displayed)
   const [results, setResults] = useState([]); 
-  // State to hold the FULL list of products (optional, see notes below)
   const [allProducts, setAllProducts] = useState([]);
-  const [isLoading, setIsLoading] = useState(false); // New state for loading indicator
+  const [isLoading, setIsLoading] = useState(false);
   const [width, setWidth] = useState("0px");
   const [sortOption, setSortOption] = useState("");
   const wrapperRef = useRef();
   const navigate = useNavigate();
 
-  // 1. Fetch data on component mount (Only done once)
   useEffect(() => {
-    // UI setup logic (remains unchanged)
     const navbar = document.querySelector("nav");
     if (navbar) setWidth(`${navbar.offsetWidth}px`);
 
@@ -45,15 +41,13 @@ export default function SearchBar() {
     };
     window.addEventListener("resize", handleResize);
     
-    // --- API Fetch Logic ---
     async function fetchAllProducts() {
       setIsLoading(true);
       try {
-        // Fetches ALL 3000 records from your Flask API
         const response = await fetch(API_BASE_URL);
         const data = await response.json();
-        setAllProducts(data); // Store the full dataset
-        setResults(data.slice(0, 50)); // Display the first 50 results initially
+        setAllProducts(data);
+        setResults(data.slice(0, 50));
       } catch (error) {
         console.error("Error fetching data from API:", error);
       } finally {
@@ -66,16 +60,13 @@ export default function SearchBar() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // 2. Client-side Search (filtering the fetched list)
   useEffect(() => {
     if (!query.trim()) {
-      // If query is empty, show the initial list (e.g., first 50)
       setResults(allProducts.slice(0, 50)); 
       return;
     }
 
     const timer = setTimeout(() => {
-      // Filter the local copy of the data (allProducts) instead of fetching a new list
       const filtered = allProducts.filter((item) =>
         item.product_name.toLowerCase().includes(query.toLowerCase())
       );
@@ -83,15 +74,12 @@ export default function SearchBar() {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [query, allProducts]); // Added allProducts to dependency array
+  }, [query, allProducts]);
 
-  // 3. Sorting (FIX: Removed 'results' from dependency array)
   useEffect(() => {
     if (sortOption && results.length > 0) {
-      // Make a COPIED array to sort
       const sorted = [...results]; 
       
-      // Note: The price parsing logic is robust and good!
       if (sortOption === "price") {
         sorted.sort(
           (a, b) =>
@@ -104,18 +92,15 @@ export default function SearchBar() {
         sorted.sort((a, b) => a.manufacturer.localeCompare(b.manufacturer));
       }
       
-      // Update the results state with the new sorted array
       setResults(sorted); 
     }
-  // 👇 FIX: Removed 'results' from dependency array. Only depend on 'sortOption'.
-  // This ensures the sorting runs ONCE when the button is clicked.
   }, [sortOption]); 
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", height: "100vh" }}>
       <div ref={wrapperRef} style={{ ...styles.searchWrapper, width }}>
         <div style={styles.leftHalf}>
-          {isLoading ? ( // Display loading indicator
+          {isLoading ? ( 
             <span>Loading Data...</span>
           ) : query ? (
             <span>
@@ -161,7 +146,6 @@ export default function SearchBar() {
           
           {!isLoading && results.length === 0 && query && <p>No results found for "{query}".</p>}
           
-          {/* Display cards */}
           {!isLoading && results.map((item) => (
             <div
               key={item.id}
@@ -195,7 +179,6 @@ export default function SearchBar() {
         </div>
       </div>
 
-      {/* Styles remain unchanged */}
       <style>
         {`
           div::-webkit-scrollbar {
@@ -209,11 +192,10 @@ export default function SearchBar() {
 }
 
 const styles = {
-  // All styles remain unchanged
   searchWrapper: {
     position: "sticky",
     top: 0,
-    zIndex: 1000,
+    zIndex: 999,
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",

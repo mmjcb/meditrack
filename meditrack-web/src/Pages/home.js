@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
-import productsData from "../data/meditrack_full_2000.json";
+import Contact from "./contact";
+
+const PRIMARY_COLOR = "#00B4D8";
+const TEXT_COLOR = "#202020";
 
 const categoryIcons = {
   "Pain Relief": "https://cdn-icons-png.flaticon.com/512/387/387630.png",
@@ -8,15 +11,8 @@ const categoryIcons = {
   "Antibiotics": "https://cdn-icons-png.flaticon.com/512/11469/11469427.png",
   "Digestive Health": "https://cdn-icons-png.flaticon.com/256/10154/10154425.png",
   "Skin Care": "https://cdn-icons-png.flaticon.com/512/3789/3789972.png",
-  "Diabetes": "https://cdn-icons-png.flaticon.com/5a12/7350/7350822.png",
+  "Diabetes": "https://cdn-icons-png.flaticon.com/512/7350/7350822.png",
   "Heart & Blood": "https://cdn-icons-png.flaticon.com/512/3595/3595788.png",
-  "Allergy & Immunity": "https://cdn-icons-png.flaticon.com/512/2865/2865526.png",
-  "Eye & Ear": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdJhiZeAR1ioj5jQEfe4zbutX9dEu6kteEVqMGTkDye9ih_Gz8iWas_9dthCT9nqXWOC4&usqp=CAU",
-  "Mental Health": "https://cdn-icons-png.flaticon.com/512/3998/3998035.png",
-  "Pregnancy & Baby": "https://cdn-icons-png.flaticon.com/512/5306/5306303.png",
-  "Oral Care": "https://cdn-icons-png.flaticon.com/512/5715/5715281.png",
-  "Hair & Scalp": "https://cdn-icons-png.flaticon.com/512/3464/3464759.png",
-  "Weight Management": "https://cdn-icons-png.flaticon.com/512/4899/4899612.png",
 };
 
 const pharmacies = [
@@ -29,82 +25,93 @@ const pharmacies = [
 
 export default function Home() {
   const [bestDeals, setBestDeals] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Filter products with a valid name
-    const validProducts = productsData.filter(item => item.product_name);
+    const API_URL = "http://127.0.0.1:5000/api/products";
 
-    // Shuffle and pick 10
-    const shuffled = [...validProducts].sort(() => 0.5 - Math.random());
-    const randomDeals = shuffled.slice(0, 10).map(item => ({
-      ...item,
-      category: item.category || "Other",
-      randomPrice: "₱" + (Math.random() * 100 + 20).toFixed(2),
-    }));
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(API_URL);
 
-    setBestDeals(randomDeals);
-  }, []);
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
 
-  const categories = Object.keys(categoryIcons).slice(0, 8);
+        const data = await res.json();
+
+        const validProducts = data.filter(item => item.product_name);
+
+        const shuffled = [...validProducts].sort(() => 0.5 - Math.random());
+        const randomDeals = shuffled.slice(0, 10).map(item => ({
+          ...item,
+          category: item.category || "Other",
+          randomPrice: "₱" + (Math.random() * 100 + 20).toFixed(2),
+        }));
+
+        setBestDeals(randomDeals);
+      } catch (err) {
+        console.error("Error fetching products:", err);
+        alert("Failed to fetch products. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  },
+ []);
+
+  const categories = Object.keys(categoryIcons);
 
   return (
-    <div>
-      {/* Hero Section */}
-      <div style={styles.container}>
-        <div style={styles.overlay}>
-          <h1 style={styles.mainText}>
-            Find the medicines you need, <br /> when you need them.
-          </h1>
-          <p style={styles.subText}>
-            Search, locate, and connect with pharmacies near you.
-          </p>
+    <div style={styles.mainWrapper}>
+      <div style={styles.heroContainer}>
+        <div style={styles.heroOverlay}>
+          <h1 style={styles.mainText}>Find the medicines you need,<br/>when you need them</h1>
+          <p style={styles.subText}>Search, locate, and connect with pharmacies near you.</p>
           <button style={styles.ctaButton}>Start Searching</button>
         </div>
       </div>
 
-      {/* Pharmacies */}
       <Section title="Pharmacies Near You">
         <div style={styles.scrollContainer}>
-          {pharmacies.map((pharmacy, index) => (
-            <div key={index} style={styles.card}>
-              <img src={pharmacy.image} alt={pharmacy.name} style={styles.image} />
-              <p style={styles.cardTitle}>{pharmacy.name}</p>
+          {pharmacies.map((p, i) => (
+            <div key={i} style={styles.pharmacyCard}>
+              <img src={p.image} alt={p.name} style={styles.pharmacyImage}/>
+              <p style={styles.cardTitle}>{p.name}</p>
             </div>
           ))}
         </div>
       </Section>
 
-      {/* Best Deals */}
       <Section title="Best Deals">
         <div style={styles.scrollContainer}>
-          {bestDeals.map((item, index) => (
-            <div key={index} style={styles.dealCard}>
-              <img
-                src={categoryIcons[item.category] || "https://cdn-icons-png.flaticon.com/512/565/565547.png"}
-                alt={item.category}
-                style={styles.dealImage}
-              />
-              <p style={styles.cardTitle}>{item.product_name}</p>
-              <p style={{ color: "#00B4D8", fontWeight: "600" }}>{item.randomPrice}</p>
-              <p style={{ fontSize: "14px", color: "#555" }}>{item.category}</p>
-            </div>
+          {loading ? <p>Loading...</p> :
+            bestDeals.map((d, i) => (
+              <div key={i} style={styles.dealCard}>
+                <img src={categoryIcons[d.category] || categoryIcons["Pain Relief"]} alt={d.category} style={styles.dealImage}/>
+                <p style={styles.cardTitle}>{d.product_name}</p>
+                <p style={styles.dealPrice}>{d.randomPrice}</p>
+                <p style={styles.dealCategory}>{d.category}</p>
+              </div>
+            ))
+          }
+        </div>
+      </Section>
+
+      <Section title="Shop by Category">
+        <div style={styles.scrollContainer}>
+          {categories.map((c, i) => (
+            <CategoryCard key={i} title={c} image={categoryIcons[c]}/>
           ))}
         </div>
       </Section>
 
-      {/* Categories */}
-      <Section title="Categories">
-        <div style={styles.scrollContainer}>
-          {categories.map((category, index) => (
-            <div key={index} style={styles.categoryCard}>
-              <img src={categoryIcons[category]} alt={category} style={styles.categoryImage} />
-              <p style={styles.cardTitle}>{category}</p>
-            </div>
-          ))}
-        </div>
-      </Section>
+      <Contact/>
     </div>
-  );
+  )
 }
 
 function Section({ title, children }) {
@@ -116,41 +123,57 @@ function Section({ title, children }) {
       </div>
       {children}
     </div>
-  );
+  )
+}
+
+function CategoryCard({ title, image }) {
+  const [hover, setHover] = useState(false);
+  return (
+    <div
+      style={{
+        ...styles.categoryCard,
+        transform: hover ? "translateY(-5px)" : "translateY(0)",
+        boxShadow: hover ? "0 8px 20px rgba(0,0,0,0.12)" : "0 6px 15px rgba(0,0,0,0.08)",
+      }}
+      onMouseEnter={()=>setHover(true)}
+      onMouseLeave={()=>setHover(false)}
+    >
+      <img src={image} alt={title} style={styles.categoryImage}/>
+      <p style={styles.categoryTitle}>{title}</p>
+    </div>
+  )
 }
 
 const styles = {
-  container: {
-    backgroundImage: "url('https://t4.ftcdn.net/jpg/03/08/02/89/360_F_308028924_YwjqVGzauey7GfmckScMtIkSPJAVNkll.jpg')",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    height: "92vh",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    borderBottomLeftRadius: "40px",
-    borderBottomRightRadius: "40px",
-    overflow: "hidden",
-    position: "relative",
+  mainWrapper: { backgroundColor: "#f9f9f9", fontFamily:"Arial, sans-serif" },
+  heroContainer: {
+    backgroundImage:"url('https://t4.ftcdn.net/jpg/03/08/02/89/360_F_308028924_YwjqVGzauey7GfmckScMtIkSPJAVNkll.jpg')",
+    backgroundSize:"cover", backgroundPosition:"center",
+    height:"90vh", display:"flex", justifyContent:"center", alignItems:"center",
+    borderBottomLeftRadius:"30px", borderBottomRightRadius:"30px", overflow:"hidden",
   },
-  overlay: { padding: "40px", borderRadius: "20px", textAlign: "center", color: "#00B4D8", maxWidth: "800px" },
-  mainText: { fontSize: "3rem", fontWeight: "bold", marginBottom: "20px", color: "#202020" },
-  subText: { fontSize: "1.5rem", marginBottom: "30px", color: "#202020" },
-  ctaButton: { backgroundColor: "#00B4D8", color: "#fff", padding: "15px 30px", fontSize: "1rem", fontWeight: "bold", border: "none", borderRadius: "10px", cursor: "pointer" },
-
-  section: { padding: "50px 80px" },
-  sectionHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "25px" },
-  sectionTitle: { fontSize: "28px", fontWeight: "700", color: "#202020" },
-  viewAllButton: { border: "none", background: "none", color: "#00B4D8", fontWeight: "600", cursor: "pointer" },
-
-  scrollContainer: { display: "flex", gap: "20px", overflowX: "auto", scrollbarWidth: "none" },
-  card: { minWidth: "220px", backgroundColor: "#fff", borderRadius: "12px", boxShadow: "0 4px 10px rgba(0,0,0,0.05)", padding: "15px", textAlign: "center", flexShrink: 0 },
-  image: { width: "100%", height: "150px", objectFit: "cover", borderRadius: "8px" },
-  cardTitle: { fontWeight: "600", color: "#202020", marginTop: "10px" },
-
-  dealCard: { minWidth: "180px", backgroundColor: "#fff", borderRadius: "12px", boxShadow: "0 4px 10px rgba(0,0,0,0.05)", padding: "15px", textAlign: "center", flexShrink: 0 },
-  dealImage: { width: "90px", height: "90px", objectFit: "contain", marginBottom: "10px" },
-
-  categoryCard: { minWidth: "200px", backgroundColor: "#fff", borderRadius: "20px", boxShadow: "0 4px 12px rgba(0,0,0,0.05)", padding: "30px", textAlign: "center", flexShrink: 0 },
-  categoryImage: { width: "100px", height: "100px", objectFit: "contain", marginBottom: "15px" },
+  heroOverlay:{
+    position:"absolute", top:0,left:0,right:0,bottom:0,
+    backgroundColor:"rgba(224, 224, 224, 0.35)",
+    display:"flex", flexDirection:"column", justifyContent:"center", alignItems:"center",
+    textAlign:"center", padding:"40px",
+  },
+  mainText:{ fontSize:"3rem", fontWeight:"800", color:TEXT_COLOR, marginBottom:"15px", lineHeight:"1.2" },
+  subText:{ fontSize:"1.2rem", color:TEXT_COLOR, marginBottom:"40px" },
+  ctaButton:{ backgroundColor:PRIMARY_COLOR, color:"#fff", padding:"18px 40px", fontSize:"1.1rem", border:"none", borderRadius:"12px", cursor:"pointer" },
+  section:{ padding:"60px 80px", maxWidth:"1400px", margin:"0 auto" },
+  sectionHeader:{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"30px" },
+  sectionTitle:{ fontSize:"30px", fontWeight:"700", color:TEXT_COLOR },
+  viewAllButton:{ border:"none", background:"none", color:PRIMARY_COLOR, fontWeight:"600", cursor:"pointer" },
+  scrollContainer:{ display:"flex", gap:"25px", overflowX:"auto", paddingBottom:"15px", scrollbarWidth:"none", msOverflowStyle:"none" },
+  cardTitle:{ fontWeight:"600", color:TEXT_COLOR, marginTop:"10px", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" },
+  pharmacyCard:{ minWidth:"220px", backgroundColor:"#fff", borderRadius:"15px", boxShadow:"0 6px 15px rgba(0,0,0,0.08)", padding:"15px", textAlign:"center", flexShrink:0, border:"1px solid #eee" },
+  pharmacyImage:{ width:"100%", height:"130px", objectFit:"cover", borderRadius:"10px" },
+  dealCard:{ minWidth:"180px", backgroundColor:"#fff", borderRadius:"15px", boxShadow:"0 6px 15px rgba(0,0,0,0.08)", padding:"18px 15px", textAlign:"center", flexShrink:0, border:"1px solid #eee" },
+  dealImage:{ width:"80px", height:"80px", objectFit:"contain", marginBottom:"15px" },
+  dealPrice:{ color:PRIMARY_COLOR, fontWeight:"700", fontSize:"1.1rem", margin:"5px 0" },
+  dealCategory:{ fontSize:"13px", color:"#777" },
+  categoryCard:{ minWidth:"180px", backgroundColor:"#fff", borderRadius:"15px", padding:"30px 15px", textAlign:"center", flexShrink:0, border:"1px solid #eee", cursor:"pointer", transition:"transform 0.3s, box-shadow 0.3s" },
+  categoryImage:{ width:"80px", height:"80px", objectFit:"contain", marginBottom:"15px" },
+  categoryTitle:{ fontWeight:"600", color:TEXT_COLOR, fontSize:"1.1rem" },
 };

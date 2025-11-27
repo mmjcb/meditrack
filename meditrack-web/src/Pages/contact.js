@@ -29,6 +29,7 @@ const steps = [
 export default function Contact() {
   return (
     <div style={styles.pageWrapper}>
+      {/* Header Section */}
       <section style={styles.headerSection}>
         <div style={styles.headerTextWrapper}>
           <h2 style={styles.headerTitle}>
@@ -56,7 +57,7 @@ export default function Contact() {
               <div style={styles.stepNumber}>{step.number}</div>
               <h3 style={styles.stepTitle}>{step.title}</h3>
               <p style={styles.stepDescription}>{step.description}</p>
-              {index < steps.length - 1 && <div style={styles.verticalLine} />}
+              {index < steps.length - 1 && <div style={styles.horizontalLine} />}
             </div>
           ))}
         </div>
@@ -70,9 +71,9 @@ const TEXT_COLOR = "#333";
 
 const styles = {
   pageWrapper: {
-    fontFamily: "Arial, sans-serif",
+    fontFamily: "'Poppins', sans-serif",
     color: TEXT_COLOR,
-    padding: "150px 20px 40px 20px",
+    padding: "120px 20px 40px 20px",
     maxWidth: "1200px",
     margin: "0 auto",
   },
@@ -83,9 +84,7 @@ const styles = {
     gap: "40px",
     marginBottom: "60px",
   },
-  headerTextWrapper: {
-    flex: "1 1 400px",
-  },
+  headerTextWrapper: { flex: "1 1 400px" },
   headerTitle: {
     fontSize: "2.5rem",
     fontWeight: "700",
@@ -94,17 +93,9 @@ const styles = {
     gap: "10px",
     marginBottom: "20px",
   },
-  logo: {
-    width: "40px",
-  },
-  highlight: {
-    color: PRIMARY_COLOR,
-  },
-  headerDescription: {
-    fontSize: "1.1rem",
-    lineHeight: "1.6",
-    marginBottom: "20px",
-  },
+  logo: { width: "40px" },
+  highlight: { color: PRIMARY_COLOR },
+  headerDescription: { fontSize: "1.1rem", lineHeight: "1.6", marginBottom: "20px" },
   knowMoreBtn: {
     border: `1px solid ${PRIMARY_COLOR}`,
     background: "transparent",
@@ -113,49 +104,47 @@ const styles = {
     borderRadius: "5px",
     cursor: "pointer",
   },
-  headerImageWrapper: {
-    flex: "1 1 400px",
-    display: "flex",
-    justifyContent: "center",
-  },
-  headerImage: {
-    maxWidth: "100%",
-    height: "auto",
-  },
-  divider: {
-    border: "none",
-    height: "1px",
-    backgroundColor: "#ccc",
-    margin: "40px 0",
-  },
-  howItWorksSection: {
-    textAlign: "center",
-    marginBottom: "60px",
-  },
-  sectionTitle: {
-    fontSize: "2rem",
-    marginBottom: "50px",
-  },
+  headerImageWrapper: { flex: "1 1 400px", display: "flex", justifyContent: "center" },
+  headerImage: { maxWidth: "100%", height: "auto" },
+  divider: { border: "none", height: "1px", backgroundColor: "#ccc", margin: "40px 0" },
+  howItWorksSection: { textAlign: "center", marginBottom: "60px" },
+  sectionTitle: { fontSize: "2rem", marginBottom: "50px" },
+
+  // Steps Layout
   stepsWrapper: {
     display: "flex",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    gap: "20px",
+    justifyContent: "center", // center steps
+    alignItems: "flex-start",
+    flexWrap: "nowrap",
+    gap: "80px", // spacing between steps
+    maxWidth: "1000px",
+    margin: "0 auto",
+    position: "relative",
   },
+
+  stepImage: { 
+    width: "300px",
+    height: "300px",
+    objectFit: "contain",
+    marginBottom: "20px"
+  },
+
   stepCard: {
-    flex: "1 1 250px",
+    flex: "1 1 0",
     textAlign: "center",
     position: "relative",
-    padding: "20px",
+    padding: "20px 15px 50px 15px",
+    maxWidth: "300px",
   },
-  stepImage: {
-    width: "100%",
-    height: "auto",
-    marginBottom: "20px",
+
+  // Remove horizontal lines
+  horizontalLine: {
+    display: "none",
   },
+
   stepNumber: {
-    width: "40px",
-    height: "40px",
+    width: "35px",
+    height: "35px",
     borderRadius: "50%",
     backgroundColor: PRIMARY_COLOR,
     color: "#fff",
@@ -163,42 +152,13 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     fontWeight: "bold",
-    fontSize: "1.5rem",
-    margin: "0 auto 10px auto",
+    fontSize: "1.2rem",
+    margin: "0 auto 12px auto",
+    position: "relative",
+    zIndex: 1,
   },
-  stepTitle: {
-    fontSize: "1.5rem",
-    fontWeight: "600",
-    marginBottom: "10px",
-  },
-  stepDescription: {
-    color: "#666",
-  },
-  verticalLine: {
-    position: "absolute",
-    bottom: "-40px",
-    left: "50%",
-    transform: "translateX(-50%)",
-    width: "3px",
-    height: "40px",
-    backgroundColor: PRIMARY_COLOR,
-  },
-  contactInfoSection: {
-    textAlign: "center",
-  },
-  contactInfoWrapper: {
-    display: "flex",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    gap: "40px",
-    fontSize: "1.1rem",
-  },
-  contactItem: {
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-  },
-  icon: {
-    color: PRIMARY_COLOR,
-  },
+
+  stepTitle: { fontSize: "1.2rem", fontWeight: "600", marginBottom: "8px" },
+  stepDescription: { fontSize: "0.95rem", color: "#666", lineHeight: "1.4" },
 };
+

@@ -1,9 +1,11 @@
 import React from "react";
+import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from "react-icons/fa";
 
 export default function Footer() {
   return (
     <footer style={styles.footer}>
       <div style={styles.container}>
+        {/* About Section */}
         <div style={styles.section}>
           <h4 style={styles.title}>About Meditrack+</h4>
           <p style={styles.text}>
@@ -12,6 +14,7 @@ export default function Footer() {
           </p>
         </div>
 
+        {/* Quick Links */}
         <div style={styles.section}>
           <h4 style={styles.title}>Quick Links</h4>
           <ul style={styles.list}>
@@ -22,13 +25,21 @@ export default function Footer() {
           </ul>
         </div>
 
+        {/* Contact & Social */}
         <div style={styles.section}>
           <h4 style={styles.title}>Contact</h4>
           <p style={styles.text}>Email: support@meditrackplus.com</p>
           <p style={styles.text}>Phone: +1 234 567 890</p>
+          <div style={styles.socialIcons}>
+            <FaFacebookF style={styles.icon} />
+            <FaTwitter style={styles.icon} />
+            <FaInstagram style={styles.icon} />
+            <FaLinkedinIn style={styles.icon} />
+          </div>
         </div>
       </div>
 
+      {/* Bottom text */}
       <div style={styles.bottom}>
         &copy; {new Date().getFullYear()} Meditrack+. All rights reserved.
       </div>
@@ -38,37 +49,36 @@ export default function Footer() {
 
 const styles = {
   footer: {
-    backgroundColor: "#00B4D8", 
-    color: "#fff", 
-    padding: "40px 20px 20px 20px",
-    fontFamily: "Arial, sans-serif",
-    marginTop: "40px",
+    backgroundColor: "#00B4D8",
+    color: "#fff",
+    padding: "50px 20px 20px 20px",
+    fontFamily: "'Poppins', sans-serif",
   },
   container: {
     display: "flex",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    maxWidth: "1000px",
+    maxWidth: "1100px",
     margin: "0 auto",
-    gap: "20px",
+    gap: "30px",
   },
   section: {
     flex: "1 1 250px",
-    minWidth: "200px",
+    minWidth: "220px",
   },
   title: {
-    fontSize: "1.1rem",
-    marginBottom: "10px",
-    fontWeight: "bold",
-    borderBottom: "2px solid #fff", 
+    fontSize: "1.2rem",
+    marginBottom: "15px",
+    fontWeight: "700",
+    borderBottom: "3px solid #ffffffff",
     display: "inline-block",
-    paddingBottom: "3px",
-    color: "#fff", 
+    paddingBottom: "5px",
+    color: "#fff",
   },
   text: {
-    fontSize: "0.9rem",
+    fontSize: "0.95rem",
     lineHeight: "1.6",
-    color: "#fff", 
+    color: "#f0f0f0",
   },
   list: {
     listStyle: "none",
@@ -76,15 +86,31 @@ const styles = {
     margin: 0,
   },
   listItem: {
-    marginBottom: "8px",
+    marginBottom: "10px",
     cursor: "pointer",
-    transition: "0.2s",
-    color: "#fff", 
+    transition: "all 0.2s",
+    color: "#f0f0f0",
+  },
+  listItemHover: {
+    color: "#00B4D8",
+  },
+  socialIcons: {
+    marginTop: "15px",
+    display: "flex",
+    gap: "15px",
+  },
+  icon: {
+    fontSize: "1.1rem",
+    cursor: "pointer",
+    transition: "0.3s",
+    color: "#fff",
   },
   bottom: {
     textAlign: "center",
-    marginTop: "30px",
-    fontSize: "0.85rem",
-    color: "#fff", 
+    marginTop: "40px",
+    fontSize: "0.9rem",
+    color: "#ffffffff",
+    borderTop: "1px solid #ffffffff",
+    paddingTop: "20px",
   },
 };
