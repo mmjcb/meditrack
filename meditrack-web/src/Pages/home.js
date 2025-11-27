@@ -8,7 +8,7 @@ const categoryIcons = {
   "Antibiotics": "https://cdn-icons-png.flaticon.com/512/11469/11469427.png",
   "Digestive Health": "https://cdn-icons-png.flaticon.com/256/10154/10154425.png",
   "Skin Care": "https://cdn-icons-png.flaticon.com/512/3789/3789972.png",
-  "Diabetes": "https://cdn-icons-png.flaticon.com/512/7350/7350822.png",
+  "Diabetes": "https://cdn-icons-png.flaticon.com/5a12/7350/7350822.png",
   "Heart & Blood": "https://cdn-icons-png.flaticon.com/512/3595/3595788.png",
   "Allergy & Immunity": "https://cdn-icons-png.flaticon.com/512/2865/2865526.png",
   "Eye & Ear": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdJhiZeAR1ioj5jQEfe4zbutX9dEu6kteEVqMGTkDye9ih_Gz8iWas_9dthCT9nqXWOC4&usqp=CAU",

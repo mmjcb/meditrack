@@ -8,20 +8,24 @@ import Profile from "./Pages/profile";
 import Cart from "./Pages/cart";
 import ProductView from "./Pages/viewProduct";
 
+import { CartProvider } from "./backend/CartContext"; 
+
 function App() {
   return (
-    <Router>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/search" element={<Search />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/product/:id" element={<ProductView />} />
-      </Routes>
-      <Footer />
-    </Router>
+    <CartProvider>
+      <Router>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/search" element={<Search />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/product/:id" element={<ProductView />} />
+        </Routes>
+        <Footer />
+      </Router>
+    </CartProvider>
   );
 }
 

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import productsData from "../data/meditrack_full_2000.json";
 import { FaTag, FaStore, FaMapMarkerAlt, FaSearch } from "react-icons/fa";
+
+const API_BASE_URL = 'http://127.0.0.1:5000/api/products';
 
 const categoryIcons = {
   "Pain Relief": "https://cdn-icons-png.flaticon.com/512/387/387630.png",
@@ -15,7 +16,7 @@ const categoryIcons = {
   "Allergy & Immunity": "https://cdn-icons-png.flaticon.com/512/2865/2865526.png",
   "Eye & Ear": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdJhiZeAR1ioj5jQEfe4zbutX9dEu6kteEVqMGTkDye9ih_Gz8iWas_9dthCT9nqXWOC4&usqp=CAU",
   "Mental Health": "https://cdn-icons-png.flaticon.com/512/3998/3998035.png",
-  "Pregnancy & Baby": "https://cdn-icons-png.flaticon.com/512/5306/5306303.png",
+  "Pregnancy & Baby": "https://cdn-icons-png.flaticom/512/5306/5306303.png",
   "Oral Care": "https://cdn-icons-png.flaticon.com/512/5715/5715281.png",
   "Hair & Scalp": "https://cdn-icons-png.flaticon.com/512/3464/3464759.png",
   "Weight Management": "https://cdn-icons-png.flaticon.com/512/4899/4899612.png",
@@ -23,13 +24,19 @@ const categoryIcons = {
 
 export default function SearchBar() {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState([]);
+  // State to hold search results (products currently displayed)
+  const [results, setResults] = useState([]); 
+  // State to hold the FULL list of products (optional, see notes below)
+  const [allProducts, setAllProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(false); // New state for loading indicator
   const [width, setWidth] = useState("0px");
   const [sortOption, setSortOption] = useState("");
   const wrapperRef = useRef();
   const navigate = useNavigate();
 
+  // 1. Fetch data on component mount (Only done once)
   useEffect(() => {
+    // UI setup logic (remains unchanged)
     const navbar = document.querySelector("nav");
     if (navbar) setWidth(`${navbar.offsetWidth}px`);
 
@@ -37,27 +44,54 @@ export default function SearchBar() {
       if (navbar) setWidth(`${navbar.offsetWidth}px`);
     };
     window.addEventListener("resize", handleResize);
+    
+    // --- API Fetch Logic ---
+    async function fetchAllProducts() {
+      setIsLoading(true);
+      try {
+        // Fetches ALL 3000 records from your Flask API
+        const response = await fetch(API_BASE_URL);
+        const data = await response.json();
+        setAllProducts(data); // Store the full dataset
+        setResults(data.slice(0, 50)); // Display the first 50 results initially
+      } catch (error) {
+        console.error("Error fetching data from API:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchAllProducts();
+
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // 2. Client-side Search (filtering the fetched list)
   useEffect(() => {
     if (!query.trim()) {
-      setResults([]);
+      // If query is empty, show the initial list (e.g., first 50)
+      setResults(allProducts.slice(0, 50)); 
       return;
     }
+
     const timer = setTimeout(() => {
-      const filtered = productsData.filter((item) =>
+      // Filter the local copy of the data (allProducts) instead of fetching a new list
+      const filtered = allProducts.filter((item) =>
         item.product_name.toLowerCase().includes(query.toLowerCase())
       );
       setResults(filtered);
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, allProducts]); // Added allProducts to dependency array
 
+  // 3. Sorting (FIX: Removed 'results' from dependency array)
   useEffect(() => {
     if (sortOption && results.length > 0) {
-      const sorted = [...results];
+      // Make a COPIED array to sort
+      const sorted = [...results]; 
+      
+      // Note: The price parsing logic is robust and good!
       if (sortOption === "price") {
         sorted.sort(
           (a, b) =>
@@ -69,17 +103,23 @@ export default function SearchBar() {
       } else if (sortOption === "manufacturer") {
         sorted.sort((a, b) => a.manufacturer.localeCompare(b.manufacturer));
       }
-      setResults(sorted);
+      
+      // Update the results state with the new sorted array
+      setResults(sorted); 
     }
-  }, [sortOption]);
+  // 👇 FIX: Removed 'results' from dependency array. Only depend on 'sortOption'.
+  // This ensures the sorting runs ONCE when the button is clicked.
+  }, [sortOption]); 
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", height: "100vh" }}>
       <div ref={wrapperRef} style={{ ...styles.searchWrapper, width }}>
         <div style={styles.leftHalf}>
-          {query ? (
+          {isLoading ? ( // Display loading indicator
+            <span>Loading Data...</span>
+          ) : query ? (
             <span>
-              Search result for <strong>{query.toUpperCase()}</strong>
+              Search results for <strong>{query.toUpperCase()}</strong>
             </span>
           ) : (
             <span>Search medicines</span>
@@ -117,9 +157,12 @@ export default function SearchBar() {
         </div>
 
         <div style={styles.cardGrid}>
-          {results.length === 0 && query && <p>No results found.</p>}
-
-          {results.map((item) => (
+          {isLoading && <p>Fetching data from API, please wait...</p>}
+          
+          {!isLoading && results.length === 0 && query && <p>No results found for "{query}".</p>}
+          
+          {/* Display cards */}
+          {!isLoading && results.map((item) => (
             <div
               key={item.id}
               style={styles.card}
@@ -152,6 +195,7 @@ export default function SearchBar() {
         </div>
       </div>
 
+      {/* Styles remain unchanged */}
       <style>
         {`
           div::-webkit-scrollbar {
@@ -165,6 +209,7 @@ export default function SearchBar() {
 }
 
 const styles = {
+  // All styles remain unchanged
   searchWrapper: {
     position: "sticky",
     top: 0,
