@@ -15,17 +15,10 @@ const categoryIcons = {
   "Heart & Blood": "https://cdn-icons-png.flaticon.com/512/3595/3595788.png",
 };
 
-const pharmacies = [
-  { name: "Mercury Drug", image: "https://static.wixstatic.com/media/d3a435_c2c53366eba94bd7bc941fa602765ed0~mv2.webp" },
-  { name: "Watsons Philippines", image: "https://i.pinimg.com/564x/b6/33/06/b63306212a347b08eb84408cd92655c5.jpg" },
-  { name: "Southstar Drug", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT740UQreYJYVgpEwBHV55MHbgHBqEzExZpzQ&s" },
-  { name: "The Generics Pharmacy", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQsmm3Nf6klIwH8UmmMYdkZUCOgPUNJ0OxQ6w&s" },
-  { name: "Rose Pharmacy", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZ_33agw0k2QGLIqFCuv2xh0fpNVVDk1cFOg&s" },
-];
-
 export default function Home() {
   const [bestDeals, setBestDeals] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [nearbyPharmacies, setNearbyPharmacies] = useState([]);
 
   useEffect(() => {
     const API_URL = "http://127.0.0.1:5000/api/products";
@@ -63,6 +56,36 @@ export default function Home() {
   },
  []);
 
+ useEffect(() => {
+  const fetchNearbyPharmacies = async () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        try {
+          const res = await fetch(`http://127.0.0.1:5000/api/nearby-pharmacies?lat=${lat}&lng=${lng}`);
+          if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+          const data = await res.json();
+          setNearbyPharmacies(data);
+        } catch (err) {
+          console.error("Error fetching nearby pharmacies:", err);
+        }
+      },
+      (error) => {
+        console.error("Error getting location:", error);
+      }
+    );
+  };
+
+  fetchNearbyPharmacies();
+}, []);
+
   const categories = Object.keys(categoryIcons);
 
   return (
@@ -75,16 +98,24 @@ export default function Home() {
         </div>
       </div>
 
-      <Section title="Pharmacies Near You">
-        <div style={styles.scrollContainer}>
-          {pharmacies.map((p, i) => (
+     <Section title="Pharmacies Near You">
+      <div style={styles.scrollContainer}>
+        {nearbyPharmacies.length === 0 ? (
+          <p>Loading nearby pharmacies...</p>
+        ) : (
+          nearbyPharmacies.map((p, i) => (
             <div key={i} style={styles.pharmacyCard}>
-              <img src={p.image} alt={p.name} style={styles.pharmacyImage}/>
+              <img 
+                src={p.image || "https://via.placeholder.com/150"} 
+                alt={p.name} 
+                style={styles.pharmacyImage} 
+              />
               <p style={styles.cardTitle}>{p.name}</p>
             </div>
-          ))}
-        </div>
-      </Section>
+          ))
+        )}
+      </div>
+    </Section>
 
       <Section title="Best Deals">
         <div style={styles.scrollContainer}>
