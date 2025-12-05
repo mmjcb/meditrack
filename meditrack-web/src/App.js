@@ -9,6 +9,7 @@ import Cart from "./Pages/cart";
 import ProductView from "./Pages/viewProduct";
 
 import { CartProvider } from "./backend/CartContext"; 
+import Login from "./Pages/login";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/search" element={<Search />} />
           <Route path="/profile" element={<Profile />} />
