@@ -17,28 +17,24 @@ const ChevronRightIcon = (props) => (
 // --- STYLES DEFINITION ---
 const styles = {
     primaryBlue: '#29ABE2',
-    secondaryBlue: '#00B4D8',
     lightGray: '#f7f7f7',
     darkText: '#202020',
-    midText: '#333',
     white: '#fff',
 
     mainContainer: {
-        minHeight: '100vh',
+        minHeight: 'calc(100vh - 160px)', 
         backgroundColor: '#fff',
-        paddingBottom: '50px',
-        paddingTop: '50px', // global padding
+        paddingTop: '150px',           
+        paddingBottom: '30px',        
     },
 
     contentWrapper: {
         display: 'flex',
         flexDirection: 'row',
-        padding: '0 20px',
         maxWidth: '1400px',
         margin: '0 auto',
         gap: '30px',
         flexWrap: 'wrap',
-        marginTop: '150px', // <-- AVOID OVERLAP WITH NAVBAR
     },
 
     sidebar: {

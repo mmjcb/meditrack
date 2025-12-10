@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Contact from "./contact";
+import Contact from "./contact.js";
 
 const PRIMARY_COLOR = "#00B4D8";
 const TEXT_COLOR = "#202020";
@@ -21,26 +21,19 @@ export default function Home() {
   const [nearbyPharmacies, setNearbyPharmacies] = useState([]);
 
   useEffect(() => {
-    const API_URL = "http://127.0.0.1:5000/api/products";
-
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const res = await fetch(API_URL);
-
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-
+        const res = await fetch("http://127.0.0.1:5000/api/products");
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
-
         const validProducts = data.filter(item => item.product_name);
 
         const shuffled = [...validProducts].sort(() => 0.5 - Math.random());
         const randomDeals = shuffled.slice(0, 10).map(item => ({
           ...item,
           category: item.category || "Other",
-          randomPrice: "₱" + (Math.random() * 100 + 20).toFixed(2),
+          randomPrice: (Math.random() * 100 + 20).toFixed(2),
         }));
 
         setBestDeals(randomDeals);
@@ -53,38 +46,25 @@ export default function Home() {
     };
 
     fetchProducts();
-  },
- []);
+  }, []);
 
- useEffect(() => {
-  const fetchNearbyPharmacies = async () => {
+  useEffect(() => {
     if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser");
+      console.warn("Geolocation not supported");
       return;
     }
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-
-        try {
-          const res = await fetch(`http://127.0.0.1:5000/api/nearby-pharmacies?lat=${lat}&lng=${lng}`);
-          if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-          const data = await res.json();
-          setNearbyPharmacies(data);
-        } catch (err) {
-          console.error("Error fetching nearby pharmacies:", err);
-        }
-      },
-      (error) => {
-        console.error("Error getting location:", error);
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const { latitude, longitude } = pos.coords;
+      try {
+        const res = await fetch(`http://127.0.0.1:5000/api/nearby-pharmacies?lat=${latitude}&lng=${longitude}`);
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        const data = await res.json();
+        setNearbyPharmacies(data);
+      } catch (err) {
+        console.error("Error fetching nearby pharmacies:", err);
       }
-    );
-  };
-
-  fetchNearbyPharmacies();
-}, []);
+    }, err => console.error(err));
+  }, []);
 
   const categories = Object.keys(categoryIcons);
 
@@ -92,57 +72,49 @@ export default function Home() {
     <div style={styles.mainWrapper}>
       <div style={styles.heroContainer}>
         <div style={styles.heroOverlay}>
-          <h1 style={styles.mainText}>Find the medicines you need,<br/>when you need them</h1>
+          <h1 style={styles.mainText}>Find the medicines you need,<br />when you need them</h1>
           <p style={styles.subText}>Search, locate, and connect with pharmacies near you.</p>
           <button style={styles.ctaButton}>Start Searching</button>
         </div>
       </div>
 
-     <Section title="Pharmacies Near You">
-      <div style={styles.scrollContainer}>
-        {nearbyPharmacies.length === 0 ? (
-          <p>Loading nearby pharmacies...</p>
-        ) : (
-          nearbyPharmacies.map((p, i) => (
-            <div key={i} style={styles.pharmacyCard}>
-              <img 
-                src={p.image || "https://via.placeholder.com/150"} 
-                alt={p.name} 
-                style={styles.pharmacyImage} 
-              />
-              <p style={styles.cardTitle}>{p.name}</p>
-            </div>
-          ))
-        )}
-      </div>
-    </Section>
+      <Section title="Pharmacies Near You">
+        <div style={styles.scrollContainer}>
+          {nearbyPharmacies.length === 0 ? (
+            <p>Loading nearby pharmacies...</p>
+          ) : (
+            nearbyPharmacies.map(p => (
+              <div key={p.id || p.name} style={styles.pharmacyCard}>
+                <img src={p.image || "https://cdn-icons-png.flaticon.com/512/1596/1596389.png"} alt={p.name} style={styles.pharmacyImage} />
+                <p style={styles.cardTitle}>{p.name}</p>
+              </div>
+            ))
+          )}
+        </div>
+      </Section>
 
       <Section title="Best Deals">
         <div style={styles.scrollContainer}>
-          {loading ? <p>Loading...</p> :
-            bestDeals.map((d, i) => (
-              <div key={i} style={styles.dealCard}>
-                <img src={categoryIcons[d.category] || categoryIcons["Pain Relief"]} alt={d.category} style={styles.dealImage}/>
-                <p style={styles.cardTitle}>{d.product_name}</p>
-                <p style={styles.dealPrice}>{d.randomPrice}</p>
-                <p style={styles.dealCategory}>{d.category}</p>
-              </div>
-            ))
-          }
+          {loading ? <p>Loading...</p> : bestDeals.map(d => (
+            <div key={d.id || d.product_name} style={styles.dealCard}>
+              <img src={categoryIcons[d.category] || categoryIcons["Pain Relief"]} alt={d.category} style={styles.dealImage} />
+              <p style={styles.cardTitle}>{d.product_name}</p>
+              <p style={styles.dealPrice}>₱{d.randomPrice}</p>
+              <p style={styles.dealCategory}>{d.category}</p>
+            </div>
+          ))}
         </div>
       </Section>
 
       <Section title="Shop by Category">
         <div style={styles.scrollContainer}>
-          {categories.map((c, i) => (
-            <CategoryCard key={i} title={c} image={categoryIcons[c]}/>
-          ))}
+          {categories.map(c => <CategoryCard key={c} title={c} image={categoryIcons[c]} />)}
         </div>
       </Section>
 
-      <Contact/>
+      <Contact />
     </div>
-  )
+  );
 }
 
 function Section({ title, children }) {
@@ -154,7 +126,7 @@ function Section({ title, children }) {
       </div>
       {children}
     </div>
-  )
+  );
 }
 
 function CategoryCard({ title, image }) {
@@ -166,13 +138,13 @@ function CategoryCard({ title, image }) {
         transform: hover ? "translateY(-5px)" : "translateY(0)",
         boxShadow: hover ? "0 8px 20px rgba(0,0,0,0.12)" : "0 6px 15px rgba(0,0,0,0.08)",
       }}
-      onMouseEnter={()=>setHover(true)}
-      onMouseLeave={()=>setHover(false)}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
     >
-      <img src={image} alt={title} style={styles.categoryImage}/>
+      <img src={image} alt={title} style={styles.categoryImage} />
       <p style={styles.categoryTitle}>{title}</p>
     </div>
-  )
+  );
 }
 
 const styles = {

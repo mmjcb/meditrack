@@ -1,5 +1,5 @@
 import React from "react";
-import SearchBar from "../Components/searchbar";
+import SearchBar from "../Components/searchbar.js";
 
 export default function Search() {
   return (
@@ -13,12 +13,13 @@ export default function Search() {
 
 const styles = {
   main: {
-    paddingTop: "120px",
+    paddingTop: "130px", // slightly more margin from navbar
     minHeight: "100vh",
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#fff", // unified background with other pages
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
+    boxSizing: "border-box",
   },
   container: {
     width: "100%",
