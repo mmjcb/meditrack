@@ -31,57 +31,69 @@ export default function Cart() {
     const selectedCartItems = cartItems.filter(item => selectedItems[item.id]);
     const selectedTotalPrice = selectedCartItems.reduce((total, item) => total + item.price * item.quantity, 0);
 
-   const handleCheckout = async () => {
-    if (!user) {
-        localStorage.setItem("guestCartRedirect", window.location.pathname);
-        if (window.confirm("You need to log in before checkout. Go to login?")) {
-            navigate("/login");
+    const handleCheckout = async () => {
+        if (!user) {
+            localStorage.setItem("guestCartRedirect", window.location.pathname);
+            if (window.confirm("You need to log in before checkout. Go to login?")) {
+                navigate("/login");
+            }
+            return;
         }
-        return;
-    }
 
-    if (selectedCartItems.length === 0) {
-        alert("Select at least one item to checkout.");
-        return;
-    }
+        if (selectedCartItems.length === 0) {
+            alert("Select at least one item to checkout.");
+            return;
+        }
 
-    try {
-        const response = await fetch(`http://127.0.0.1:5000/api/products/pharmacy_name?id=${selectedCartItems[0].id}`);
-        if (!response.ok) throw new Error("Failed to fetch pharmacy info");
-        const data = await response.json();
-        setPharmacyName(data.name || "the pharmacy");
-    } catch (err) {
-        console.error(err);
-        setPharmacyName("the pharmacy");
-    }
+        try {
+            const response = await fetch(`http://127.0.0.1:5000/api/products/pharmacy_name?id=${selectedCartItems[0].id}`);
+            if (!response.ok) throw new Error("Failed to fetch pharmacy info");
+            const data = await response.json();
+            setPharmacyName(data.name || "the pharmacy");
+        } catch (err) {
+            console.error(err);
+            setPharmacyName("the pharmacy");
+        }
 
-    if (!cartID) {
-        console.error("Cart ID is missing!");
-        alert("Cannot process transaction: cart not found.");
-        return;
-    }
+        if (!cartID) {
+            alert("Cannot process transaction: cart not found.");
+            return;
+        }
 
-    try {
-        const transactionRef = push(ref(db, "Transaction_History")); 
-        const transactionId = transactionRef.key;
-        const transactionDate = Date.now(); 
+        let transactionId = "";
 
-        await set(transactionRef, {
-            transaction_id: transactionId,
-            cart_id: cartID,  
-            transaction_date: transactionDate
-        });
+        try {
+            const transactionRef = push(ref(db, "Transaction_History"));
+            transactionId = transactionRef.key;
+            const transactionDate = Date.now();
 
-  
-    } catch (err) {
-        alert("Failed to save transaction. Try again later.");
-        return;
-    }
+            await set(transactionRef, {
+                transaction_id: transactionId,
+                cart_id: cartID,
+                transaction_date: transactionDate,
+                total_amount: selectedTotalPrice,
+                items: selectedCartItems.map(item => ({
+                    id: item.id,
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity,
+                    subtotal: item.price * item.quantity
+                }))
+            });
 
-    setShowModal(true);
-};
+        } catch (err) {
+            alert("Failed to save transaction. Try again later.");
+            return;
+        }
 
+        selectedCartItems.forEach(item => removeItem(item.id));
 
+        setShowModal(true);
+
+        setTimeout(() => {
+            navigate(`/checkout/${transactionId}`);
+        }, 800);
+    };
 
     const closeModal = () => setShowModal(false);
 
@@ -164,7 +176,7 @@ const styles = {
   pageWrapper: { 
     fontFamily: "'Poppins', sans-serif", 
     color: TEXT_COLOR, 
-    padding: "60px 20px 20px 20px", // top, right, bottom, left
+    padding: "60px 20px 20px 20px",
     maxWidth: "1200px",
     margin: "0 auto",
     width: "100%",
@@ -173,7 +185,7 @@ const styles = {
   cartHeaderWrapper: { 
     zIndex: 1000, 
     backgroundColor: PRIMARY_COLOR, 
-    width: "100%",             
+    width: "100%",            
     display: "flex", 
     alignItems: "center", 
     justifyContent: "flex-start", 
@@ -188,8 +200,8 @@ const styles = {
   emptyMessage: { textAlign: "center", fontSize: "1.2rem", color: "#666", marginTop: "50px" },
   mainContentGrid: { 
     display: "grid", 
-    gridTemplateColumns: "2.2fr 1fr", // slightly wider product list, balanced UI
-    gap: "50px", // gap between product list and order summary
+    gridTemplateColumns: "2.2fr 1fr",
+    gap: "50px",
     width: "100%", 
     alignItems: "start" 
   },
@@ -207,7 +219,7 @@ const styles = {
     border: "1px solid #eee" 
   },
   checkboxInput: { transform: "scale(1.2)", cursor: "pointer" },
-  itemImagePlaceholder: { width: "70px", height: "70px", borderRadius: "8px", backgroundColor: "#f5f5f5", display: "flex", alignItems: "center", justifyContent: "center" },
+  itemImagePlaceholder: { width: "70px", height: "70px", borderRadius: "8px", backgroundColor: "#f5f5f5" },
   itemDetails: { minWidth: "140px" },
   itemName: { fontSize: "1.1rem", fontWeight: "600", marginBottom: "4px" },
   itemPrice: { fontWeight: "700", fontSize: "1rem", color: TEXT_COLOR },
