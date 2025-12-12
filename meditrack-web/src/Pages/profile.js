@@ -1,6 +1,6 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; 
+import { useAuth } from '../backend/AuthContext.js';
 // --- SVG ICON COMPONENTS ---
 const UserCircleIcon = (props) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
@@ -143,11 +143,21 @@ const MenuItem = ({ name, isActive, onClick, isLogout = false }) => (
 // --- Main Profile Component ---
 export default function Profile() {
     const [activeMenu, setActiveMenu] = React.useState('AccountInformation');
+    const { user } = useAuth();
     const navigate = useNavigate();
+    const { logout } = useAuth();
 
     const handleNavigation = (menuName) => {
         setActiveMenu(menuName);
     };
+
+    useEffect(() => {
+        if (!user) {
+            navigate("/login", { replace: true });
+        }
+    }, [user, navigate]);
+
+    if (!user) return null;
 
     const renderContent = () => {
         switch (activeMenu) {
@@ -196,7 +206,7 @@ export default function Profile() {
                 <aside style={styles.sidebar}>
                     <div style={styles.userInfo}>
                         <UserCircleIcon style={styles.userIcon} />
-                        <span style={styles.username}>username</span>
+                        <span style={styles.username}>{user?.username || user?.email}</span>
                     </div>
 
                     <MenuItem
@@ -235,11 +245,22 @@ export default function Profile() {
                         onClick={() => handleNavigation('FAQs')}
                     />
 
-                    <MenuItem
-                        name="Logout"
-                        isLogout={true}
-                        onClick={() => handleNavigation('Logout')}
-                    />
+                  <MenuItem
+                    name="Logout"
+                    isLogout={true}
+                    onClick={async () => {
+                        const confirmLogout = window.confirm("Are you sure you want to log out?");
+                        if (confirmLogout) {
+                            try {
+                                await logout();     
+                                navigate("/login"); 
+                            } catch (err) {
+                                console.error("Logout failed:", err);
+                                alert("Failed to log out. Please try again.");
+                            }
+                        }
+                    }}
+                />
                 </aside>
 
                 {/* Right Content Area */}

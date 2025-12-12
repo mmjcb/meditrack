@@ -3,12 +3,14 @@ import { FaPlus, FaMinus, FaTrash, FaTimes, FaTruck } from "react-icons/fa";
 import { useCart } from '../backend/CartContext.js';
 import { useAuth } from '../backend/AuthContext.js';
 import { useNavigate } from "react-router-dom";
+import { ref, push, set } from "firebase/database";
+import { db } from '../backend/firebase.js';
 
 const PRIMARY_COLOR = "#29ABE2"; 
 const TEXT_COLOR = "#333";
 
 export default function Cart() {
-    const { cartItems, incrementQty, decrementQty, removeItem } = useCart();
+    const { cartItems, incrementQty, decrementQty, removeItem, cartID } = useCart();
     const { user } = useAuth();
     const navigate = useNavigate();
     
@@ -16,7 +18,6 @@ export default function Cart() {
     const [showModal, setShowModal] = useState(false);
     const [pharmacyName, setPharmacyName] = useState("");
 
-    // Initialize selection state whenever cartItems change
     useEffect(() => {
         const initialSelection = {};
         cartItems.forEach(item => { initialSelection[item.id] = true });
@@ -30,31 +31,57 @@ export default function Cart() {
     const selectedCartItems = cartItems.filter(item => selectedItems[item.id]);
     const selectedTotalPrice = selectedCartItems.reduce((total, item) => total + item.price * item.quantity, 0);
 
-    const handleCheckout = async () => {
-        if (!user) {
-            if (window.confirm("You need to log in before checkout. Go to login?")) {
-                navigate("/login");
-            }
-            return;
+   const handleCheckout = async () => {
+    if (!user) {
+        localStorage.setItem("guestCartRedirect", window.location.pathname);
+        if (window.confirm("You need to log in before checkout. Go to login?")) {
+            navigate("/login");
         }
+        return;
+    }
 
-        if (selectedCartItems.length === 0) {
-            alert("Select at least one item to checkout.");
-            return;
-        }
+    if (selectedCartItems.length === 0) {
+        alert("Select at least one item to checkout.");
+        return;
+    }
 
-        try {
-            const response = await fetch(`http://127.0.0.1:5000/api/products/pharmacy_name?id=${selectedCartItems[0].id}`);
-            if (!response.ok) throw new Error("Failed to fetch pharmacy info");
-            const data = await response.json();
-            setPharmacyName(data.name || "the pharmacy");
-        } catch (err) {
-            console.error(err);
-            setPharmacyName("the pharmacy");
-        }
+    try {
+        const response = await fetch(`http://127.0.0.1:5000/api/products/pharmacy_name?id=${selectedCartItems[0].id}`);
+        if (!response.ok) throw new Error("Failed to fetch pharmacy info");
+        const data = await response.json();
+        setPharmacyName(data.name || "the pharmacy");
+    } catch (err) {
+        console.error(err);
+        setPharmacyName("the pharmacy");
+    }
 
-        setShowModal(true);
-    };
+    if (!cartID) {
+        console.error("Cart ID is missing!");
+        alert("Cannot process transaction: cart not found.");
+        return;
+    }
+
+    try {
+        const transactionRef = push(ref(db, "Transaction_History")); 
+        const transactionId = transactionRef.key;
+        const transactionDate = Date.now(); 
+
+        await set(transactionRef, {
+            transaction_id: transactionId,
+            cart_id: cartID,  
+            transaction_date: transactionDate
+        });
+
+  
+    } catch (err) {
+        alert("Failed to save transaction. Try again later.");
+        return;
+    }
+
+    setShowModal(true);
+};
+
+
 
     const closeModal = () => setShowModal(false);
 

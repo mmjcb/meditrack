@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { auth, db } from "../backend/firebase.js";
+import { getDatabase, ref, set } from "firebase/database";
+import { auth } from "../backend/firebase.js";
 
 const PRIMARY_COLOR = "#00B4D8";
 const TEXT_COLOR = "#202020";
 
 export default function Register() {
+  const db = getDatabase();
   const [fname, setFname] = useState("");
   const [lname, setLname] = useState("");
   const [username, setUsername] = useState("");
@@ -31,31 +32,34 @@ export default function Register() {
       return;
     }
 
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+ try {
+  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  const user = userCredential.user;
 
-      await setDoc(doc(db, "users", user.uid), {
-        fname,
-        lname,
-        username,
-        email,
-        profilePic:
-          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQt3VYVgX11z-bWzfirZ7dPKv8ymIQ9yimgQQ&s",
-        createdAt: serverTimestamp(),
-      });
+  const userData = {
+    uid: user.uid,
+    fname,
+    lname,
+    username,
+    email,
+    profilePic:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQt3VYVgX11z-bWzfirZ7dPKv8ymIQ9yimgQQ&s",
+    createdAt: Date.now(),
+  };
 
-      setSuccess("Registration successful! You can now log in.");
-      setFname("");
-      setLname("");
-      setUsername("");
-      setEmail("");
-      setPassword("");
-      setConfirmPassword("");
-    } catch (err) {
-      console.error(err);
-      setError(err.message);
-    }
+  await set(ref(db, `User/${user.uid}`), userData);
+
+  setSuccess("Registration successful! You can now log in.");
+  setFname("");
+  setLname("");
+  setUsername("");
+  setEmail("");
+  setPassword("");
+  setConfirmPassword("");
+} catch (err) {
+  console.error(err);
+  setError(err.message);
+}
   };
 
   return (
