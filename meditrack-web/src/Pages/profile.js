@@ -1,7 +1,10 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; 
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../backend/AuthContext.js';
-// --- SVG ICON COMPONENTS ---
+import { ref, onValue } from "firebase/database";
+import { db } from '../backend/firebase.js';
+
+// --- SVG ICONS ---
 const UserCircleIcon = (props) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
         <path d="M416 208c0 45.9-14.9 88.3-40 122.7L452.9 452.9c8.5 8.5 8.5 22.1 0 30.6l-3.5 3.5c-8.5 8.5-22.1 8.5-30.6 0L336 348.7c-34.4 25.2-76.8 40-122.7 40-108.9 0-197.6-88.7-197.6-197.6S104.9 0 213.8 0s197.6 88.7 197.6 197.6zM413.8 208c0-110.5-89.9-197.6-197.6-197.6-110.5 0-197.6 89.9-197.6 197.6S102.3 405.6 210.8 405.6c110.5 0 197.6-89.9 197.6-197.6zM256 128c-44.2 0-80 35.8-80 80s35.8 80 80 80 80-35.8 80-80-35.8-80-80-80z"/>
@@ -125,7 +128,6 @@ const styles = {
     },
 };
 
-// --- Menu Item Component ---
 const MenuItem = ({ name, isActive, onClick, isLogout = false }) => (
     <div
         style={{
@@ -142,23 +144,64 @@ const MenuItem = ({ name, isActive, onClick, isLogout = false }) => (
 
 // --- Main Profile Component ---
 export default function Profile() {
-    const [activeMenu, setActiveMenu] = React.useState('AccountInformation');
-    const { user } = useAuth();
+    const [activeMenu, setActiveMenu] = useState('AccountInformation');
+    const [transactions, setTransactions] = useState([]);
+    const { user, logout } = useAuth();
     const navigate = useNavigate();
-    const { logout } = useAuth();
+    const location = useLocation();
 
-    const handleNavigation = (menuName) => {
-        setActiveMenu(menuName);
-    };
+    // --- Set activeMenu from query param ---
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const tab = params.get("tab");
+        if (tab) setActiveMenu(tab);
+    }, [location.search]);
 
+    // --- Redirect to login if not logged in ---
     useEffect(() => {
         if (!user) {
             navigate("/login", { replace: true });
         }
     }, [user, navigate]);
 
+    // --- Fetch transactions when CheckoutHistory is active ---
+   useEffect(() => {
+  if (activeMenu === 'CheckoutHistory' && user) {
+    // 1. Fetch all carts
+    const cartsRef = ref(db, "Cart");
+    const unsubscribeCarts = onValue(cartsRef, (snapshot) => {
+      const cartsData = snapshot.val() || {};
+      // Get all cart IDs that belong to this user
+      const userCartIDs = Object.entries(cartsData)
+        .filter(([cartId, cart]) => cart.user_id === user.uid)
+        .map(([cartId]) => cartId);
+
+      // 2. Fetch all transactions
+      const transactionsRef = ref(db, "Transaction_History");
+      const unsubscribeTransactions = onValue(transactionsRef, (txSnapshot) => {
+        const txData = txSnapshot.val() || {};
+        // Only include transactions whose cart_id is in the user's carts
+        const userTransactions = Object.values(txData)
+          .filter(tx => userCartIDs.includes(tx.cart_id));
+
+        setTransactions(userTransactions);
+      });
+
+      // Clean up transactions listener when carts listener updates
+      return () => unsubscribeTransactions();
+    });
+
+    // Clean up carts listener
+    return () => unsubscribeCarts();
+  }
+}, [activeMenu, user]);
+
+
+    const handleNavigation = (menuName) => setActiveMenu(menuName);
+
     if (!user) return null;
 
+    // --- Render content based on active menu ---
     const renderContent = () => {
         switch (activeMenu) {
             case 'AccountInformation':
@@ -170,7 +213,33 @@ export default function Profile() {
                         </div>
                     </>
                 );
+
             case 'CheckoutHistory':
+                return (
+                    <>
+                        <h2 style={styles.contentHeader}>Checkout History</h2>
+                        {transactions.length === 0 ? (
+                            <p style={{ textAlign: 'center', marginTop: '50px' }}>No transactions found.</p>
+                        ) : (
+                            <div>
+                                {transactions.map(tx => (
+                                    <div key={tx.transaction_id} style={{ padding: '12px', borderBottom: '1px solid #eee' }}>
+                                        <p><strong>Date:</strong> {new Date(tx.transaction_date).toLocaleString()}</p>
+                                        <p><strong>Total:</strong> ₱{tx.total_amount.toFixed(2)}</p>
+                                        <ul>
+                                            {tx.items?.map(item => (
+                                                <li key={item.id}>
+                                                    {item.name} - {item.quantity} x ₱{item.price.toFixed(2)} = ₱{item.subtotal.toFixed(2)}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </>
+                );
+
             case 'Reserve':
             case 'Notifications':
             case 'Settings':
@@ -185,6 +254,7 @@ export default function Profile() {
                         </div>
                     </>
                 );
+
             case 'Logout':
                 return (
                     <>
@@ -194,6 +264,7 @@ export default function Profile() {
                         </div>
                     </>
                 );
+
             default:
                 return null;
         }
@@ -244,23 +315,22 @@ export default function Profile() {
                         isActive={activeMenu === 'FAQs'}
                         onClick={() => handleNavigation('FAQs')}
                     />
-
-                  <MenuItem
-                    name="Logout"
-                    isLogout={true}
-                    onClick={async () => {
-                        const confirmLogout = window.confirm("Are you sure you want to log out?");
-                        if (confirmLogout) {
-                            try {
-                                await logout();     
-                                navigate("/login"); 
-                            } catch (err) {
-                                console.error("Logout failed:", err);
-                                alert("Failed to log out. Please try again.");
+                    <MenuItem
+                        name="Logout"
+                        isLogout={true}
+                        onClick={async () => {
+                            const confirmLogout = window.confirm("Are you sure you want to log out?");
+                            if (confirmLogout) {
+                                try {
+                                    await logout();
+                                    navigate("/login");
+                                } catch (err) {
+                                    console.error("Logout failed:", err);
+                                    alert("Failed to log out. Please try again.");
+                                }
                             }
-                        }
-                    }}
-                />
+                        }}
+                    />
                 </aside>
 
                 {/* Right Content Area */}

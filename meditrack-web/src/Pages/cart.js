@@ -30,7 +30,7 @@ export default function Cart() {
 
     const selectedCartItems = cartItems.filter(item => selectedItems[item.id]);
     const selectedTotalPrice = selectedCartItems.reduce((total, item) => total + item.price * item.quantity, 0);
-
+    const [modalTotal, setModalTotal] = useState(0);
     const handleCheckout = async () => {
         if (!user) {
             localStorage.setItem("guestCartRedirect", window.location.pathname);
@@ -60,6 +60,8 @@ export default function Cart() {
             return;
         }
 
+        const transactionAmount = selectedTotalPrice; 
+
         let transactionId = "";
 
         try {
@@ -85,14 +87,16 @@ export default function Cart() {
             alert("Failed to save transaction. Try again later.");
             return;
         }
-
-        selectedCartItems.forEach(item => removeItem(item.id));
-
+        setModalTotal(transactionAmount);
+            selectedCartItems.forEach(item => removeItem(item.id));
         setShowModal(true);
 
         setTimeout(() => {
-            navigate(`/checkout/${transactionId}`);
+            setShowModal(false);
+            navigate("/profile?tab=CheckoutHistory");
         }, 800);
+
+
     };
 
     const closeModal = () => setShowModal(false);
@@ -164,7 +168,7 @@ export default function Cart() {
                         <FaTruck style={{ fontSize: "2rem", color: PRIMARY_COLOR, marginBottom: "15px" }} />
                         <h2>Order Ready for Pickup</h2>
                         <p>Your products are ready for pickup from <strong>{pharmacyName}</strong>.</p>
-                        <p>Please prepare <strong>₱{selectedTotalPrice.toFixed(2)}</strong>.</p>
+                        <p>Please prepare <strong>₱{modalTotal.toFixed(2)}</strong>.</p>
                     </div>
                 </div>
             )}
