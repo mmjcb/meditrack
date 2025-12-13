@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../backend/AuthContext.js';
-import { ref, get, remove, set } from "firebase/database";
+import { ref, get, remove, update } from "firebase/database";
 import { db } from '../backend/firebase.js';
 import { useCart } from '../backend/CartContext.js';
 import apiDataset from '../data/api-dataset.json';
@@ -503,23 +503,27 @@ export default function Profile() {
         setAccountInfo(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSave = async () => {
-        setIsSaving(true);
-        try {
-            await set(ref(db, `Users/${user.uid}`), {
-                ...accountInfo,
-                email: user.email // keep email unchanged
-            });
-            // Update the local state with the saved data (optional, but good practice)
-            setAccountInfo(prev => ({ ...prev })); 
-            showAlert("Account information updated successfully.", 'success');
-        } catch (err) {
-            console.error("Failed to update account info:", err);
-            showAlert("Failed to update account information. Try again.", 'danger');
-        } finally {
-            setIsSaving(false);
-        }
-    };
+   const handleSave = async () => {
+    if (!user) return;
+
+    setIsSaving(true);
+    try {
+        await update(ref(db, `User/${user.uid}`), {
+            fname: accountInfo.firstName,
+            lname: accountInfo.lastName,
+            username: accountInfo.username,
+            phone: accountInfo.phone || null,
+            address: accountInfo.address || null,
+        });
+
+        showAlert("Account information updated successfully.", "success");
+    } catch (err) {
+        console.error("Failed to update account info:", err);
+        showAlert("Failed to update account information. Try again.", "danger");
+    } finally {
+        setIsSaving(false);
+    }
+};
     
     // Function to show alert
     const showAlert = (message, type = 'success') => {
