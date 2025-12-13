@@ -411,15 +411,33 @@ const Modal = ({ title, message, isOpen, onConfirm, onCancel, confirmText = "Con
     );
 };
 
+const getInitials = (first, last) => {
+                    const firstInitial = first ? first.charAt(0).toUpperCase() : '';
+                    const lastInitial = last ? last.charAt(0).toUpperCase() : '';
+                    return `${firstInitial}${lastInitial}`;
+};
 
 // --- Sidebar Component (Extracted for better readability) ---
 const ProfileSidebar = ({ accountInfo, activeMenu, handleNavigation, handleLogout }) => (
     <div style={styles.sidebar}>
         <div style={styles.userInfo}>
-            <UserCircleIcon style={styles.userIcon} />
+            <div
+                style={{
+                    ...styles.userIcon,
+                    backgroundColor: styles.primaryBlue,
+                    color: '#fff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: '700',
+                    fontSize: '22px'
+                }}
+            >
+                {getInitials(accountInfo.firstName, accountInfo.lastName)}
+            </div>
             <span style={styles.username}>
                 {/* Displays the most relevant name/username/email in the sidebar */}
-                {accountInfo.username || accountInfo.firstName || accountInfo.email}
+                {`${accountInfo.firstName} ${accountInfo.lastName}`.trim() || accountInfo.username || accountInfo.email}
             </span>
         </div>
 
@@ -489,12 +507,12 @@ export default function Profile() {
 
     // --- Account Info State ---
     const [accountInfo, setAccountInfo] = useState({
-        firstName: user?.firstName || '',
-        lastName: user?.lastName || '',
-        username: user?.username || '',
-        email: user?.email || '',
-        phone: user?.phone || '',
-        address: user?.address || ''
+        firstName: '',
+        lastName: '',
+        username: '',
+        email: '',
+        phone: '',
+        address: ''
     });
     const [isSaving, setIsSaving] = useState(false);
 
@@ -542,6 +560,32 @@ export default function Profile() {
             navigate("/login", { replace: true });
         }
     }, [user, navigate]);
+
+    useEffect(() => {
+    if (!user) return;
+
+    const fetchUserInfo = async () => {
+        try {
+            const snapshot = await get(ref(db, `User/${user.uid}`));
+            if (!snapshot.exists()) return;
+
+            const data = snapshot.val();
+
+            setAccountInfo({
+                firstName: data.fname || '',
+                lastName: data.lname || '',
+                username: data.username || '',
+                email: data.email || user.email || '',
+                phone: data.phone || '',
+                address: data.address || ''
+            });
+        } catch (error) {
+            console.error("Error fetching user info:", error);
+        }
+    };
+
+    fetchUserInfo();
+    }, [user]);
 
 
     // --- Transaction/Reservation Fetching useEffects (Unchanged) ---
@@ -669,12 +713,6 @@ export default function Profile() {
 
             case 'AccountInformation':
                 // Helper function to safely extract initials
-                const getInitials = (first, last) => {
-                    const firstInitial = first ? first.charAt(0).toUpperCase() : '';
-                    const lastInitial = last ? last.charAt(0).toUpperCase() : '';
-                    return `${firstInitial}${lastInitial}`;
-                };
-
                 const userInitials = getInitials(accountInfo.firstName, accountInfo.lastName);
 
                 // Define common styles for re-use
@@ -738,7 +776,7 @@ export default function Profile() {
 
                                 {/* User Full Name Display */}
                                 <div style={{ fontSize: '20px', fontWeight: '700', color: '#222', textAlign: 'center' }}>
-                                    {accountInfo.firstName || 'Guest'} {accountInfo.lastName}
+                                     {accountInfo.firstName || accountInfo.lastName ? `${accountInfo.firstName} ${accountInfo.lastName}`.trim(): 'Guest'}
                                 </div>
 
                                 {/* Username Display */}
