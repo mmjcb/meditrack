@@ -210,10 +210,20 @@ const styles = {
     height: "60px", 
     marginBottom: "50px", 
     boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-    marginTop: "80px",
+    marginTop: "80px"
   },
-  pageTitle: { fontSize: "1.8rem", fontWeight: "700", color: "#fff", margin: 0 },
-  emptyMessage: { textAlign: "center", fontSize: "1.2rem", color: "#666", marginTop: "50px" },
+  pageTitle: { 
+    fontSize: "1.8rem", 
+    fontWeight: "700", 
+    color: "#fff", 
+    margin: 0 
+},
+  emptyMessage: { 
+    textAlign: "center", 
+    fontSize: "1.2rem", 
+    color: "#666", 
+    marginTop: "50px" 
+},
   mainContentGrid: { 
     display: "grid", 
     gridTemplateColumns: "2.2fr 1fr",

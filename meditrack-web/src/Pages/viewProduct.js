@@ -34,6 +34,7 @@ export default function ProductView() {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { user } = useAuth();
+
   const [product, setProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -70,39 +71,51 @@ export default function ProductView() {
     fetchProduct();
   }, [id]);
 
+  /* 🔒 STOCK CHECK */
   const handleButtonClick = async (action) => {
     if (!product) return;
+
+    if (product.availability === "Out of Stock") {
+      triggerAlert("This item is out of stock.");
+      return;
+    }
+
     if (action === "cart") {
       addToCart(product);
       triggerAlert(`${product.product_name} has been added to your cart.`);
-     } else if (action === "reserve") {
-    try {
-      const reservationsRef = ref(db, "Reservation");
-      const newReservationRef = push(reservationsRef);
-      const reservationData = {
-        reservation_id: newReservationRef.key,
-        medicine_id: product.id,
-        user_id: user.uid,
-        reservation_date: new Date().toISOString(),
-        status: "Reserved"
-      };
+    } 
+    else if (action === "reserve") {
+      try {
+        if (!user) {
+          triggerAlert("Login first before making a reservation.");
+          return;
+        }
 
-      await set(newReservationRef, reservationData);
+        const reservationsRef = ref(db, "Reservation");
+        const newReservationRef = push(reservationsRef);
 
-      triggerAlert(`Reservation created for ${product.product_name}.`);
-    } catch (err) {
-      console.error("Reservation error:", err);
-      triggerAlert("Login first before making a reservation.");
+        const reservationData = {
+          reservation_id: newReservationRef.key,
+          medicine_id: product.id,
+          user_id: user.uid,
+          reservation_date: new Date().toISOString(),
+          status: "Reserved"
+        };
+
+        await set(newReservationRef, reservationData);
+        triggerAlert(`Reservation created for ${product.product_name}.`);
+      } catch (err) {
+        console.error("Reservation error:", err);
+        triggerAlert("Something went wrong while reserving.");
+      }
     }
-  }
-};
+  };
 
   if (isLoading) return <LoadingView message="Loading product details..." />;
   if (error || !product) return <ErrorView message={error || "Product not found."} navigate={navigate} />;
 
   return (
     <div style={styles.container}>
-      {/* ALERT */}
       {alert.show && <div style={styles.alert}>{alert.message}</div>}
 
       <button onClick={() => navigate(-1)} style={styles.backButton}>
@@ -110,7 +123,6 @@ export default function ProductView() {
       </button>
 
       <div style={styles.flexWrapper}>
-        {/* IMAGE */}
         <div style={styles.imageWrapper}>
           <img
             src={categoryIcons[product.category]}
@@ -119,14 +131,12 @@ export default function ProductView() {
           />
         </div>
 
-        {/* DETAILS */}
         <div style={styles.detailsWrapper}>
-          <span style={{...styles.availability, backgroundColor: getAvailabilityColor(product.availability)}}>
+          <span style={{ ...styles.availability, backgroundColor: getAvailabilityColor(product.availability) }}>
             {getAvailabilityIcon(product.availability)} {product.availability}
           </span>
 
           <h1 style={styles.productTitle}>{product.product_name}</h1>
-
           <p style={styles.price}><FaTag /> {product.price}</p>
 
           <div style={styles.info}>
@@ -137,13 +147,16 @@ export default function ProductView() {
           </div>
 
           <div style={styles.actionButtons}>
-            <button style={buttonStyle("#00B4D8")} onClick={() => handleButtonClick("cart")}>Add to Cart</button>
-            <button style={buttonStyle("#FFB300")} onClick={() => handleButtonClick("reserve")}>Reserve</button>
+            <button style={buttonStyle("#00B4D8")} onClick={() => handleButtonClick("cart")}>
+              Add to Cart
+            </button>
+            <button style={buttonStyle("#FFB300")} onClick={() => handleButtonClick("reserve")}>
+              Reserve
+            </button>
           </div>
         </div>
       </div>
 
-      {/* INFO SECTIONS */}
       <div style={styles.sectionsWrapper}>
         <Section title="Overview" content={product.overview} />
         <Section title="Uses & Benefits" content={product.uses_benefits} />
@@ -154,7 +167,7 @@ export default function ProductView() {
   );
 }
 
-/* -------------------- SUB-COMPONENTS -------------------- */
+/* -------------------- SUB COMPONENTS -------------------- */
 
 function Section({ title, content }) {
   if (!content) return null;
@@ -267,12 +280,10 @@ const styles = {
     fontSize: "15px",
     fontWeight: "600",
     zIndex: 9999,
-    boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
-    animation: "fadeInOut 3s ease"
+    boxShadow: "0 4px 10px rgba(0,0,0,0.15)"
   }
 };
 
-/* -------------------- BUTTON & AVAILABILITY HELPERS -------------------- */
 function buttonStyle(bgColor) {
   return {
     padding: "10px 20px",
@@ -282,9 +293,7 @@ function buttonStyle(bgColor) {
     color: "#fff",
     fontWeight: "600",
     cursor: "pointer",
-    flex: "1 1 100px",
-    transition: "0.3s",
-    outline: "none"
+    flex: "1 1 100px"
   };
 }
 

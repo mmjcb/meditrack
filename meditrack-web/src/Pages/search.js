@@ -13,9 +13,9 @@ export default function Search() {
 
 const styles = {
   main: {
-    paddingTop: "130px", // slightly more margin from navbar
+    paddingTop: "130px",
     minHeight: "100vh",
-    backgroundColor: "#fff", // unified background with other pages
+    backgroundColor: "#fff",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",

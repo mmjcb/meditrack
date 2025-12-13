@@ -66,7 +66,7 @@ export default function Home() {
         const res = await fetch(`http://127.0.0.1:5000/api/nearby-pharmacies?lat=${latitude}&lng=${longitude}`);
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
-        setNearbyPharmacies(data.slice(0, 6)); 
+        setNearbyPharmacies(data.slice(0, 10)); 
       } catch (err) {
         console.error("Error fetching nearby pharmacies:", err);
       }

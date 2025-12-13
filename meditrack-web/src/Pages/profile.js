@@ -63,7 +63,7 @@ const styles = {
         borderRadius: '10px',
         boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
         padding: '20px 0',
-        height: 'fit-content',
+        height: '550px',
     },
 
     userInfo: {
@@ -86,8 +86,8 @@ const styles = {
         fontSize: '20px',
         fontWeight: '600',
         color: '#202020',
-        textAlign: 'center', // Added for better display
-        wordBreak: 'break-word', // Handle long names/emails
+        textAlign: 'center', 
+        wordBreak: 'break-word',
     },
     menuItem: {
         display: 'flex',
@@ -184,41 +184,25 @@ const MenuItem = ({ name, isActive, onClick, isLogout = false }) => (
     </div>
 );
 
-const StyledAlert = ({ message, type, onClose }) => {
+const StyledAlert = ({ message }) => {
     if (!message) return null;
 
-    const backgroundColor = type === 'success' ? styles.successGreen : styles.dangerRed;
-    
     return (
         <div style={{
-            position: 'fixed',
-            top: '100px',
-            right: '20px',
-            padding: '15px 25px',
-            backgroundColor: backgroundColor,
-            color: styles.white,
-            borderRadius: '5px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-            zIndex: 1000,
-            display: 'flex',
-            alignItems: 'center',
-            minWidth: '250px',
-            fontWeight: '600'
+            position: "fixed",
+            top: "20px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            backgroundColor: "#29ABE2",
+            color: "#fff",
+            padding: "12px 20px",
+            borderRadius: "10px",
+            fontSize: "15px",
+            fontWeight: "600",
+            zIndex: 9999,
+            boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
         }}>
             {message}
-            <button 
-                onClick={onClose} 
-                style={{
-                    marginLeft: '20px',
-                    background: 'none',
-                    border: 'none',
-                    color: styles.white,
-                    fontSize: '18px',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    opacity: 0.8
-                }}
-            >&times;</button>
         </div>
     );
 };
@@ -653,7 +637,7 @@ export default function Profile() {
                 const resSnap = await get(ref(db, "Reservation"));
                 const resData = resSnap.val() || {};
 
-                const userReservations = Object.entries(resData) // Use entries to get the key (reservation_id)
+                const userReservations = Object.entries(resData)
                     .filter(([, res]) => res.user_id === user.uid)
                     .map(([id, res]) => {
 
@@ -661,7 +645,7 @@ export default function Profile() {
 
                         return {
                             ...res,
-                            reservation_id: id, // Attach ID to reservation object
+                            reservation_id: id,
                             reservation_date: new Date(res.reservation_date),
                             medicine_name: med?.product_name || "Unknown",
                             category_icon: med?.category_icon || "https://via.placeholder.com/50",
@@ -687,11 +671,11 @@ export default function Profile() {
     const handleLogout = () => {
         setModal({
             isOpen: true,
-            title: "Logout", // Matches new modal title
+            title: "Logout", 
             message: "Are you sure you want to logout of your account?",
             confirmText: "Logout", 
             cancelText: "Cancel",
-            useLogoutStyle: true, // Use the new, customized style
+            useLogoutStyle: true,
             onConfirm: async () => {
                 setModal({ ...modal, isOpen: false });
                 try {
@@ -1083,10 +1067,9 @@ export default function Profile() {
                                         />
                                         <div style={{ fontWeight: '600', color: styles.darkText, fontSize: '16px' }}>{res.medicine_name}</div>
                                         <div style={{ fontSize: '14px', color: '#666' }}>
-                                            <span style={{ fontWeight: 'bold', color: styles.primaryBlue }}>₱{res.price.toFixed(2)}</span> (Qty: {res.quantity})
+                                            <span style={{ fontWeight: 'bold', color: styles.primaryBlue }}>₱{res.price.toFixed(2)}</span>
                                         </div>
                                         <div style={{ fontSize: '12px', color: '#888' }}>
-                                            Reserved: {res.reservation_date.toLocaleDateString()}
                                         </div>
                                         <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                                             <button
@@ -1094,7 +1077,7 @@ export default function Profile() {
                                                 style={{
                                                     flex: 1,
                                                     padding: '8px',
-                                                    backgroundColor: styles.successGreen,
+                                                    backgroundColor: "#00B4D8",
                                                     color: styles.white,
                                                     border: 'none',
                                                     borderRadius: '5px',
@@ -1170,7 +1153,7 @@ export default function Profile() {
 
     return (
         <div style={styles.mainContainer}>
-            <StyledAlert message={alert.message} type={alert.type} onClose={() => setAlert({ message: '', type: '' })} />
+            <StyledAlert message={alert.message} />
             <Modal
                 title={modal.title}
                 message={modal.message}
