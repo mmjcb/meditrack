@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
+import { useAuth } from '../backend/AuthContext.js';
 import { useParams, useNavigate } from "react-router-dom";
 import { useCart } from '../backend/CartContext.js';
 import { 
   FaArrowLeft, FaTag, FaStore, FaMapMarkerAlt, FaIndustry, FaListAlt, 
   FaCheckCircle, FaTimesCircle, FaExclamationCircle 
 } from "react-icons/fa";
+import { ref, push, set } from "firebase/database";
+import { db } from "../backend/firebase.js";
 
 const API_BASE_URL = 'http://127.0.0.1:5000/api/products';
 
@@ -30,7 +33,7 @@ export default function ProductView() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
-
+  const { user } = useAuth();
   const [product, setProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -67,15 +70,32 @@ export default function ProductView() {
     fetchProduct();
   }, [id]);
 
-  const handleButtonClick = (action) => {
+  const handleButtonClick = async (action) => {
     if (!product) return;
     if (action === "cart") {
       addToCart(product);
       triggerAlert(`${product.product_name} has been added to your cart.`);
-    } else if (action === "reserve") {
-      triggerAlert(`Reservation requested for ${product.product_name}.`);
+     } else if (action === "reserve") {
+    try {
+      const reservationsRef = ref(db, "Reservation");
+      const newReservationRef = push(reservationsRef);
+      const reservationData = {
+        reservation_id: newReservationRef.key,
+        medicine_id: product.id,
+        user_id: user.uid,
+        reservation_date: new Date().toISOString(),
+        status: "Reserved"
+      };
+
+      await set(newReservationRef, reservationData);
+
+      triggerAlert(`Reservation created for ${product.product_name}.`);
+    } catch (err) {
+      console.error("Reservation error:", err);
+      triggerAlert("Login first before making a reservation.");
     }
-  };
+  }
+};
 
   if (isLoading) return <LoadingView message="Loading product details..." />;
   if (error || !product) return <ErrorView message={error || "Product not found."} navigate={navigate} />;

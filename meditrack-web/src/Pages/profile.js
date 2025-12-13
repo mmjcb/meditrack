@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../backend/AuthContext.js';
-import { ref, onValue } from "firebase/database";
+import { ref, get, remove } from "firebase/database";
 import { db } from '../backend/firebase.js';
+import { useCart } from '../backend/CartContext.js';
+
 
 // --- SVG ICONS ---
 const UserCircleIcon = (props) => (
@@ -146,9 +148,12 @@ const MenuItem = ({ name, isActive, onClick, isLogout = false }) => (
 export default function Profile() {
     const [activeMenu, setActiveMenu] = useState('AccountInformation');
     const [transactions, setTransactions] = useState([]);
+    const [reservations, setReservations] = useState([]);
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
+    const { addToCart } = useCart();
+    
 
     // --- Set activeMenu from query param ---
     useEffect(() => {
@@ -164,38 +169,99 @@ export default function Profile() {
         }
     }, [user, navigate]);
 
-    // --- Fetch transactions when CheckoutHistory is active ---
-   useEffect(() => {
-  if (activeMenu === 'CheckoutHistory' && user) {
-    // 1. Fetch all carts
-    const cartsRef = ref(db, "Cart");
-    const unsubscribeCarts = onValue(cartsRef, (snapshot) => {
-      const cartsData = snapshot.val() || {};
-      // Get all cart IDs that belong to this user
+    useEffect(() => {
+  if (activeMenu !== 'CheckoutHistory' || !user) return;
+
+  const fetchTransactions = async () => {
+    try {
+      const cartSnap = await get(ref(db, "Cart"));
+      const cartsData = cartSnap.val() || {};
       const userCartIDs = Object.entries(cartsData)
         .filter(([cartId, cart]) => cart.user_id === user.uid)
         .map(([cartId]) => cartId);
 
-      // 2. Fetch all transactions
-      const transactionsRef = ref(db, "Transaction_History");
-      const unsubscribeTransactions = onValue(transactionsRef, (txSnapshot) => {
-        const txData = txSnapshot.val() || {};
-        // Only include transactions whose cart_id is in the user's carts
-        const userTransactions = Object.values(txData)
-          .filter(tx => userCartIDs.includes(tx.cart_id));
+      if (userCartIDs.length === 0) {
+        setTransactions([]);
+        return;
+      }
 
-        setTransactions(userTransactions);
+      const txSnap = await get(ref(db, "Transaction_History"));
+      const txData = txSnap.val() || {};
+      const userTransactions = Object.values(txData)
+        .filter(tx => userCartIDs.includes(tx.cart_id));
+
+      if (userTransactions.length === 0) {
+        setTransactions([]);
+        return;
+      }
+
+      const medSnap = await get(ref(db, "Medicine"));
+      const medicineData = medSnap.val() || {};
+      
+
+      const enrichedTransactions = userTransactions.map(tx => {
+        const enrichedItems = tx.items?.map(item => {
+          const med = medicineData[String(item.id)]; 
+          console.log("Looking up medicine ID:", item.id);
+          console.log("Medicine found:", med);
+          return {
+            ...item,
+            product_image: med?.category_icon || "https://via.placeholder.com/150"
+          };
+        }) || [];
+
+        return {
+          ...tx,
+          items: enrichedItems
+        };
       });
 
-      // Clean up transactions listener when carts listener updates
-      return () => unsubscribeTransactions();
-    });
+      setTransactions(enrichedTransactions);
 
-    // Clean up carts listener
-    return () => unsubscribeCarts();
-  }
+    } catch (err) {
+      console.error("Failed to fetch transactions:", err);
+    }
+  };
+
+  fetchTransactions();
+
 }, [activeMenu, user]);
 
+useEffect(() => {
+  if (activeMenu !== 'Reserve' || !user) return;
+
+  const fetchReservations = async () => {
+    try {
+      const resSnap = await get(ref(db, "Reservation"));
+      const resData = resSnap.val() || {};
+
+      const medSnap = await get(ref(db, "Medicine"));
+      const medicineData = medSnap.val() || {};
+
+      const userReservations = Object.values(resData)
+        .filter(res => res.user_id === user.uid)
+        .map(res => {
+          const med = medicineData[res.medicine_id];
+          return {
+            ...res,
+            reservation_date: new Date(res.reservation_date),
+            medicine_name: med?.product_name || "Unknown",
+            category_icon: med?.category_icon || "https://via.placeholder.com/50",
+            price: med?.price || 0
+          };
+        })
+        .sort((a, b) => b.reservation_date - a.reservation_date); 
+
+      setReservations(userReservations);
+
+    } catch (err) {
+      console.error("Failed to fetch reservations:", err);
+      setReservations([]);
+    }
+  };
+
+  fetchReservations();
+}, [activeMenu, user]);
 
     const handleNavigation = (menuName) => setActiveMenu(menuName);
 
@@ -214,33 +280,201 @@ export default function Profile() {
                     </>
                 );
 
-            case 'CheckoutHistory':
-                return (
-                    <>
-                        <h2 style={styles.contentHeader}>Checkout History</h2>
-                        {transactions.length === 0 ? (
-                            <p style={{ textAlign: 'center', marginTop: '50px' }}>No transactions found.</p>
-                        ) : (
-                            <div>
-                                {transactions.map(tx => (
-                                    <div key={tx.transaction_id} style={{ padding: '12px', borderBottom: '1px solid #eee' }}>
-                                        <p><strong>Date:</strong> {new Date(tx.transaction_date).toLocaleString()}</p>
-                                        <p><strong>Total:</strong> ₱{tx.total_amount.toFixed(2)}</p>
-                                        <ul>
-                                            {tx.items?.map(item => (
-                                                <li key={item.id}>
-                                                    {item.name} - {item.quantity} x ₱{item.price.toFixed(2)} = ₱{item.subtotal.toFixed(2)}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                ))}
+           case 'CheckoutHistory':
+            return (
+                <>
+                <h2 style={styles.contentHeader}>Checkout History</h2>
+                {transactions.length === 0 ? (
+                    <p style={{ textAlign: 'center', marginTop: '50px' }}>No transactions found.</p>
+                ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    {transactions
+                        .sort((a, b) => new Date(b.transaction_date) - new Date(a.transaction_date)) // newest first
+                        .map(tx => (
+                        <div key={tx.transaction_id} style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            padding: '15px 20px',
+                            border: '1px solid #e0e0e0',
+                            borderRadius: '10px',
+                            backgroundColor: '#fff',
+                            boxShadow: '0 2px 5px rgba(0,0,0,0.05)'
+                        }}>
+                            {/* Date + time */}
+                            <div style={{ marginBottom: '10px', fontWeight: '600', color: '#202020' }}>
+                            Date: {new Date(tx.transaction_date).toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                             </div>
-                        )}
-                    </>
-                );
 
-            case 'Reserve':
+                            {/* Items */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            {tx.items?.map(item => (
+                                <div key={item.id} style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                padding: '10px',
+                                border: '1px solid #f0f0f0',
+                                borderRadius: '5px',
+                                backgroundColor: '#fafafa'
+                                }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <img
+                                    src={item.product_image || 'https://via.placeholder.com/50'}
+                                    alt={item.name}
+                                    style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '5px' }}
+                                    />
+                                    <span style={{ fontWeight: '500', color: '#202020' }}>
+                                    {item.name} - {item.quantity} x ₱{item.price.toFixed(2)}
+                                    </span>
+                                </div>
+                                <span style={{ fontWeight: '600', color: '#29ABE2' }}>₱{item.subtotal.toFixed(2)}</span>
+                                </div>
+                            ))}
+                            </div>
+
+                            {/* Footer */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '15px', alignItems: 'center' }}>
+                            <button style={{
+                                padding: '5px 12px',
+                                backgroundColor: '#fff',
+                                border: '1px solid #29ABE2',
+                                borderRadius: '5px',
+                                color: '#29ABE2',
+                                cursor: 'pointer'
+                            }}>Details</button>
+
+                            <span style={{ fontWeight: '600', color: '#29ABE2' }}>Total: ₱{tx.total_amount.toFixed(2)}</span>
+                            </div>
+                        </div>
+                        ))}
+                    </div>
+                )}
+                </>
+            );
+           case 'Reserve':
+            const handleRemoveReservation = async (reservationId) => {
+                const confirmDelete = window.confirm("Are you sure you want to remove this reservation?");
+                if (!confirmDelete) return;
+
+                try {
+                    await remove(ref(db, `Reservation/${reservationId}`));
+
+                    setReservations(prev => prev.filter(res => res.reservation_id !== reservationId));
+                } catch (err) {
+                    console.error("Failed to remove reservation:", err);
+                    alert("Failed to remove reservation. Please try again.");
+                }
+            };
+
+            const handleAddReservationToCart = async (res) => {
+                if (!user) return;
+
+                const product = {
+                    id: res.medicine_id,
+                    product_name: res.medicine_name,
+                    price: res.price.toString(),
+                    pharmacy_name: res.pharmacy_name || "Default Pharmacy",
+                    pharmacy_logo: res.pharmacy_logo || "",
+                    pharmacy_location: res.pharmacy_location || "",
+                    manufacturer: res.manufacturer || "",
+                    availability: res.availability || "",
+                    category_name: res.category_name || "",
+                    category_icon: res.category_icon,
+                    product_image: res.category_icon,
+                    overview: res.overview || "",
+                    usage: res.usage || "",
+                    how_it_works: res.how_it_works || "",
+                    side_effects: res.side_effects || ""
+                };
+
+                addToCart(product);
+
+                alert(`${res.medicine_name} added to cart.`);
+
+                await remove(ref(db, `Reservation/${res.reservation_id}`));
+
+                setReservations(prev => prev.filter(r => r.reservation_id !== res.reservation_id));
+
+                navigate("/cart");
+            };
+
+            return (
+                <>
+                    <h2 style={styles.contentHeader}>My Reservations</h2>
+                    {reservations.length === 0 ? (
+                        <p style={{ textAlign: 'center', marginTop: '50px' }}>
+                            You have no reservations.
+                        </p>
+                    ) : (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+                            {reservations.map(res => (
+                                <div key={res.reservation_id} style={{
+                                    width: '200px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    padding: '15px',
+                                    border: '1px solid #e0e0e0',
+                                    borderRadius: '10px',
+                                    backgroundColor: '#fff',
+                                    boxShadow: '0 2px 5px rgba(0,0,0,0.05)',
+                                    alignItems: 'center',
+                                }}>
+
+                                    <div style={{ marginBottom: '10px', fontWeight: '600', color: '#202020', fontSize: '14px' }}>
+                                        {res.reservation_date.toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                    </div>
+
+                                    <img
+                                        src={res.category_icon}
+                                        alt={res.medicine_name}
+                                        style={{ width: '120px', height: '120px', objectFit: 'cover', borderRadius: '5px', marginBottom: '10px' }}
+                                    />
+
+                                    <span style={{ fontWeight: '600', textAlign: 'center', marginBottom: '5px' }}>
+                                        {res.medicine_name}
+                                    </span>
+
+                                    <span style={{ color: '#29ABE2', fontWeight: '600', marginBottom: '10px' }}>
+                                        ₱{Number(res.price || 0).toFixed(2)}
+                                    </span>
+
+                                    <div style={{ display: 'flex', gap: '10px' }}>
+                                        <button 
+                                            onClick={() => handleRemoveReservation(res.reservation_id)}
+                                            style={{
+                                                padding: '5px 10px',
+                                                backgroundColor: '#fff',
+                                                border: '1px solid #E74C3C',
+                                                borderRadius: '5px',
+                                                color: '#E74C3C',
+                                                cursor: 'pointer',
+                                                fontSize: '12px'
+                                            }}
+                                        >
+                                            Remove
+                                        </button>
+
+                                        <button
+                                            onClick={() => handleAddReservationToCart(res)}
+                                            style={{
+                                                padding: '5px 10px',
+                                                backgroundColor: '#29ABE2',
+                                                border: 'none',
+                                                borderRadius: '5px',
+                                                color: '#fff',
+                                                cursor: 'pointer',
+                                                fontSize: '12px'
+                                            }}
+                                        >
+                                            Add to Cart
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </>
+            );
             case 'Notifications':
             case 'Settings':
             case 'Help':

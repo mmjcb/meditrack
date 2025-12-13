@@ -23,8 +23,8 @@ export default function Login() {
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             console.log("Logged in user:", userCredential.user);
-            setError(""); // clear error
-            navigate("/"); // redirect to home after login
+            setError(""); 
+            navigate("/"); 
         } catch (err) {
             setError(err.message);
         }
