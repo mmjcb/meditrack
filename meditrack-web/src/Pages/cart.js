@@ -31,6 +31,7 @@ export default function Cart() {
     const selectedCartItems = cartItems.filter(item => selectedItems[item.id]);
     const selectedTotalPrice = selectedCartItems.reduce((total, item) => total + item.price * item.quantity, 0);
     const [modalTotal, setModalTotal] = useState(0);
+
     const handleCheckout = async () => {
         if (!user) {
             localStorage.setItem("guestCartRedirect", window.location.pathname);
@@ -87,19 +88,30 @@ export default function Cart() {
             alert("Failed to save transaction. Try again later.");
             return;
         }
+        
         setModalTotal(transactionAmount);
-            selectedCartItems.forEach(item => removeItem(item.id));
+        
+        // Remove items from the cart *after* the transaction is saved
+        selectedCartItems.forEach(item => removeItem(item.id));
+        
+        // Show the modal
         setShowModal(true);
 
+        // --- CHANGE APPLIED HERE ---
+        // Automatically close modal after 2 seconds (increased from 800ms for better UX)
         setTimeout(() => {
             setShowModal(false);
-            navigate("/profile?tab=CheckoutHistory");
-        }, 800);
-
-
+            // Optionally redirect here if needed, but per request, we remove the redirection:
+            // navigate("/profile?tab=CheckoutHistory"); 
+        }, 2000);
+        // --- END OF CHANGE ---
     };
 
-    const closeModal = () => setShowModal(false);
+    const closeModal = () => {
+        setShowModal(false);
+        // We will now redirect to profile/checkout history ONLY when the user closes the modal (or the timeout fires)
+        navigate("/profile?tab=CheckoutHistory");
+    };
 
     return (
         <div style={styles.pageWrapper}>
