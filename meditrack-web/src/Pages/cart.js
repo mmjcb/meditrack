@@ -197,7 +197,6 @@ export default function Cart() {
                         <button onClick={closeModal} style={styles.modalCloseBtn}><FaTimes /></button>
                         <FaTruck style={{ fontSize: "2.5rem", color: PRIMARY_COLOR, marginBottom: "10px" }} />
                         <h2 style={{ fontWeight: 700 }}>Order Ready!</h2>
-                        <p style={{ fontSize: "0.9rem" }}>Pickup from: <strong>{pharmacyName}</strong></p>
                         <div style={styles.modalPriceTag}>Total: ₱{modalTotal.toFixed(2)}</div>
                     </div>
                 </div>
