@@ -6,7 +6,6 @@ import { db } from '../backend/firebase.js';
 import { useCart } from '../backend/CartContext.js';
 import apiDataset from '../data/api-dataset.json';
 
-// --- SVG ICONS ---
 const UserCircleIcon = (props) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
         <path d="M416 208c0 45.9-14.9 88.3-40 122.7L452.9 452.9c8.5 8.5 8.5 22.1 0 30.6l-3.5 3.5c-8.5 8.5-22.1 8.5-30.6 0L336 348.7c-34.4 25.2-76.8 40-122.7 40-108.9 0-197.6-88.7-197.6-197.6S104.9 0 213.8 0s197.6 88.7 197.6 197.6zM413.8 208c0-110.5-89.9-197.6-197.6-197.6-110.5 0-197.6 89.9-197.6 197.6S102.3 405.6 210.8 405.6c110.5 0 197.6-89.9 197.6-197.6zM256 128c-44.2 0-80 35.8-80 80s35.8 80 80 80 80-35.8 80-80-35.8-80-80-80z"/>
@@ -19,21 +18,21 @@ const ChevronRightIcon = (props) => (
     </svg>
 );
 
-// Icon for Logout Modal (FaSignOutAlt equivalent)
 const LogoutArrowIcon = (props) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
         <path d="M160 96c17.7 0 32-14.3 32-32s-14.3-32-32-32H96C43 32 0 75 0 128V384c0 53 43 96 96 96h64c17.7 0 32-14.3 32-32s-14.3-32-32-32H96c-17.7 0-32-14.3-32-32V128c0-17.7 14.3-32 32-32h64zm325.3 192l-40.7-40.7c-6.2-6.2-16.4-6.2-22.6 0s-6.2 16.4 0 22.6L423.4 272H192c-8.8 0-16 7.2-16 16s7.2 16 16 16H423.4l-29.3 29.3c-6.2 6.2-6.2 16.4 0 22.6s16.4 6.2 22.6 0l40.7-40.7c6.2-6.2 6.2-16.4 0-22.6z"/>
     </svg>
 );
 
-// CSS property definitions for scrollbar hiding (Firefox/IE/Edge only via inline styles)
 const scrollbarHiddenProps = {
-    msOverflowStyle: 'none', // IE and Edge
-    scrollbarWidth: 'none', // Firefox
+    msOverflowStyle: 'none',
+    scrollbarWidth: 'none',
 };
 
-// --- STYLES DEFINITION (Simplified for brevity, assuming standard imports) ---
+const FONT_FAMILY = "Poppins, system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+
 const styles = {
+    fontFamily: FONT_FAMILY, 
     primaryBlue: '#29ABE2',
     lightGray: '#f7f7f7',
     darkText: '#202020',
@@ -44,8 +43,9 @@ const styles = {
     mainContainer: {
         minHeight: 'calc(100vh - 160px)', 
         backgroundColor: '#fff',
-        paddingTop: '150px',         
-        paddingBottom: '30px',      
+        paddingTop: '120px',         
+        paddingBottom: '30px',
+        fontFamily: FONT_FAMILY,       
     },
 
     contentWrapper: {
@@ -55,6 +55,7 @@ const styles = {
         margin: '0 auto',
         gap: '30px',
         flexWrap: 'wrap',
+        fontFamily: FONT_FAMILY,
     },
 
     sidebar: {
@@ -64,6 +65,7 @@ const styles = {
         boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
         padding: '20px 0',
         height: '550px',
+        fontFamily: FONT_FAMILY,
     },
 
     userInfo: {
@@ -73,6 +75,7 @@ const styles = {
         padding: '0 20px 20px 20px',
         borderBottom: `1px solid #f7f7f7`,
         marginBottom: '10px',
+        fontFamily: FONT_FAMILY,
     },
     userIcon: {
         width: '60px',
@@ -81,6 +84,7 @@ const styles = {
         borderRadius: '50%',
         marginBottom: '10px',
         border: `2px solid #e0e0e0`,
+        fontFamily: FONT_FAMILY,
     },
     username: {
         fontSize: '20px',
@@ -88,6 +92,7 @@ const styles = {
         color: '#202020',
         textAlign: 'center', 
         wordBreak: 'break-word',
+        fontFamily: FONT_FAMILY,
     },
     menuItem: {
         display: 'flex',
@@ -99,6 +104,7 @@ const styles = {
         color: '#202020',
         cursor: 'pointer',
         transition: '0.2s',
+        fontFamily: FONT_FAMILY,
     },
     activeMenuItem: {
         backgroundColor: '#f7f7f7',
@@ -110,6 +116,7 @@ const styles = {
         marginTop: '10px',
         borderTop: `1px solid #f7f7f7`,
         paddingTop: '10px',
+        fontFamily: FONT_FAMILY,
     },
     chevronIcon: {
         width: '14px',
@@ -126,6 +133,7 @@ const styles = {
         padding: '30px',
         minWidth: '300px',
         minHeight: '300px',
+        fontFamily: FONT_FAMILY,
     },
     contentHeader: {
         fontSize: '24px',
@@ -134,6 +142,7 @@ const styles = {
         paddingBottom: '10px',
         borderBottom: `1px solid #333`,
         marginBottom: '30px',
+        fontFamily: FONT_FAMILY,
     },
     underDevelopmentText: {
         fontSize: '20px',
@@ -145,6 +154,7 @@ const styles = {
         alignItems: 'center',
         height: '200px',
         textAlign: 'center',
+        fontFamily: FONT_FAMILY,
     },
     
     checkoutListContainer: {
@@ -154,7 +164,8 @@ const styles = {
         maxHeight: '400px',
         overflowY: 'auto',
         paddingRight: '10px',
-        ...scrollbarHiddenProps
+        ...scrollbarHiddenProps,
+        fontFamily: FONT_FAMILY,
     },
     reservationListContainer: {
         display: 'flex',
@@ -164,11 +175,10 @@ const styles = {
         overflowY: 'auto',
         paddingRight: '10px',
         alignContent: 'flex-start',
-        ...scrollbarHiddenProps
+        ...scrollbarHiddenProps,
+        fontFamily: FONT_FAMILY,
     },
 };
-
-// --- Custom Components ---
 
 const MenuItem = ({ name, isActive, onClick, isLogout = false }) => (
     <div
@@ -201,6 +211,7 @@ const StyledAlert = ({ message }) => {
             fontWeight: "600",
             zIndex: 9999,
             boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
+            fontFamily: FONT_FAMILY,
         }}>
             {message}
         </div>
@@ -210,7 +221,6 @@ const StyledAlert = ({ message }) => {
 const Modal = ({ title, message, isOpen, onConfirm, onCancel, confirmText = "Confirm", cancelText = "Cancel", useLogoutStyle = false }) => {
     if (!isOpen) return null;
 
-    // Use specific styles for the logout modal design (MATCHES PREVIOUS REQUEST)
     if (useLogoutStyle) {
         return (
             <div style={{
@@ -223,7 +233,8 @@ const Modal = ({ title, message, isOpen, onConfirm, onCancel, confirmText = "Con
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                zIndex: 1000
+                zIndex: 1000,
+                fontFamily: FONT_FAMILY,
             }}>
                 <div style={{
                     backgroundColor: styles.white,
@@ -237,8 +248,8 @@ const Modal = ({ title, message, isOpen, onConfirm, onCancel, confirmText = "Con
                     flexDirection: 'column',
                     alignItems: 'center',
                     position: 'relative',
+                    fontFamily: FONT_FAMILY,
                 }}>
-                    {/* Close Button (X icon) */}
                     <button 
                         onClick={onCancel} 
                         style={{
@@ -253,7 +264,6 @@ const Modal = ({ title, message, isOpen, onConfirm, onCancel, confirmText = "Con
                         }}
                     >&times;</button>
 
-                    {/* Icon Container */}
                     <div style={{
                         width: '50px',
                         height: '50px',
@@ -289,7 +299,6 @@ const Modal = ({ title, message, isOpen, onConfirm, onCancel, confirmText = "Con
                     </p>
                     
                     <div style={{ display: 'flex', justifyContent: 'space-around', gap: '15px', width: '100%' }}>
-                        {/* Cancel Button (Light Style) */}
                         <button
                             onClick={onCancel}
                             style={{
@@ -309,7 +318,6 @@ const Modal = ({ title, message, isOpen, onConfirm, onCancel, confirmText = "Con
                             {cancelText}
                         </button>
                         
-                        {/* Logout Button (Red Style) */}
                         <button
                             onClick={onConfirm}
                             style={{
@@ -335,7 +343,6 @@ const Modal = ({ title, message, isOpen, onConfirm, onCancel, confirmText = "Con
         );
     }
     
-    // Default Modal Style (kept for non-logout confirmations if needed)
     return (
         <div style={{
             position: 'fixed',
@@ -347,7 +354,8 @@ const Modal = ({ title, message, isOpen, onConfirm, onCancel, confirmText = "Con
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            zIndex: 1000
+            zIndex: 1000,
+            fontFamily: FONT_FAMILY,
         }}>
             <div style={{
                 backgroundColor: styles.white,
@@ -356,7 +364,8 @@ const Modal = ({ title, message, isOpen, onConfirm, onCancel, confirmText = "Con
                 boxShadow: '0 5px 15px rgba(0, 0, 0, 0.3)',
                 maxWidth: '400px',
                 width: '90%',
-                textAlign: 'center'
+                textAlign: 'center',
+                fontFamily: FONT_FAMILY,
             }}>
                 <h3 style={{ borderBottom: `1px solid ${styles.lightGray}`, paddingBottom: '10px', marginBottom: '20px', color: styles.darkText }}>{title}</h3>
                 <p style={{ marginBottom: '30px', fontSize: '16px', color: styles.darkText }}>{message}</p>
@@ -401,7 +410,6 @@ const getInitials = (first, last) => {
                     return `${firstInitial}${lastInitial}`;
 };
 
-// --- Sidebar Component (Extracted for better readability) ---
 const ProfileSidebar = ({ accountInfo, activeMenu, handleNavigation, handleLogout }) => (
     <div style={styles.sidebar}>
         <div style={styles.userInfo}>
@@ -420,7 +428,6 @@ const ProfileSidebar = ({ accountInfo, activeMenu, handleNavigation, handleLogou
                 {getInitials(accountInfo.firstName, accountInfo.lastName)}
             </div>
             <span style={styles.username}>
-                {/* Displays the most relevant name/username/email in the sidebar */}
                 {`${accountInfo.firstName} ${accountInfo.lastName}`.trim() || accountInfo.username || accountInfo.email}
             </span>
         </div>
@@ -469,8 +476,6 @@ const ProfileSidebar = ({ accountInfo, activeMenu, handleNavigation, handleLogou
     </div>
 );
 
-
-// --- Main Profile Component ---
 export default function Profile() {
     const [activeMenu, setActiveMenu] = useState('AccountInformation');
     const [transactions, setTransactions] = useState([]);
@@ -489,7 +494,6 @@ export default function Profile() {
     const location = useLocation();
     const { addToCart } = useCart();
 
-    // --- Account Info State ---
     const [accountInfo, setAccountInfo] = useState({
         firstName: '',
         lastName: '',
@@ -527,7 +531,6 @@ export default function Profile() {
     }
 };
     
-    // Function to show alert
     const showAlert = (message, type = 'success') => {
         setAlert({ message, type });
         setTimeout(() => setAlert({ message: '', type: '' }), 3000);
@@ -572,7 +575,6 @@ export default function Profile() {
     }, [user]);
 
 
-    // --- Transaction/Reservation Fetching useEffects (Unchanged) ---
     useEffect(() => {
         if (activeMenu !== 'CheckoutHistory' || !user) return;
 
@@ -696,10 +698,8 @@ export default function Profile() {
         switch (activeMenu) {
 
             case 'AccountInformation':
-                // Helper function to safely extract initials
                 const userInitials = getInitials(accountInfo.firstName, accountInfo.lastName);
 
-                // Define common styles for re-use
                 const inputStyle = { 
                     padding: '10px', 
                     borderRadius: '5px', 
@@ -725,10 +725,8 @@ export default function Profile() {
                             Account Information
                         </h2>
                         
-                        {/* Master Container: Uses flex to split the content area into Left (Profile) and Right (Inputs) */}
                         <div style={{ display: 'flex', gap: '40px', maxWidth: '900px', padding: '0 10px' }}>
                             
-                            {/* 1. 📸 Left Column: Profile Picture & Name */}
                             <div style={{ 
                                 display: 'flex', 
                                 flexDirection: 'column', 
@@ -741,7 +739,6 @@ export default function Profile() {
                                 boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
                             }}>
                                 
-                                {/* Dynamic Avatar Placeholder */}
                                 <div style={{
                                     width: '100px',
                                     height: '100px',
@@ -758,12 +755,10 @@ export default function Profile() {
                                     {userInitials || '👤'} 
                                 </div>
 
-                                {/* User Full Name Display */}
                                 <div style={{ fontSize: '20px', fontWeight: '700', color: '#222', textAlign: 'center' }}>
                                      {accountInfo.firstName || accountInfo.lastName ? `${accountInfo.firstName} ${accountInfo.lastName}`.trim(): 'Guest'}
                                 </div>
 
-                                {/* Username Display */}
                                 {accountInfo.username && (
                                     <div style={{ 
                                         fontSize: '16px', 
@@ -776,10 +771,6 @@ export default function Profile() {
                                         @{accountInfo.username}
                                     </div>
                                 )}
-                                {/* End Username Display */}
-
-
-                                {/* Button to handle photo upload/change */}
                                 <button
                                     // onClick={handlePhotoChange} 
                                     style={{
@@ -801,7 +792,6 @@ export default function Profile() {
                                 </button>
                             </div>
 
-                            {/* 2. Right Column: Form Inputs */}
                             <div style={{ 
                                 display: 'flex', 
                                 flexDirection: 'column', 
@@ -809,9 +799,7 @@ export default function Profile() {
                                 flex: 1
                             }}>
                                 
-                                {/* First Name / Last Name Row */}
                                 <div style={{ display: 'flex', gap: '20px' }}>
-                                    {/* First Name */}
                                     <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
                                         <label style={labelStyle}>First Name</label>
                                         <input
@@ -823,7 +811,6 @@ export default function Profile() {
                                         />
                                     </div>
 
-                                    {/* Last Name */}
                                     <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
                                         <label style={labelStyle}>Last Name</label>
                                         <input
@@ -836,7 +823,6 @@ export default function Profile() {
                                     </div>
                                 </div>
 
-                                {/* Username (full width) */}
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                                     <label style={labelStyle}>Username</label>
                                     <input
@@ -848,9 +834,7 @@ export default function Profile() {
                                     />
                                 </div>
 
-                                {/* Email / Phone Number Row */}
                                 <div style={{ display: 'flex', gap: '20px' }}>
-                                    {/* Email */}
                                     <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
                                         <label style={labelStyle}>Email (Cannot be changed)</label>
                                         <input
@@ -862,7 +846,6 @@ export default function Profile() {
                                         />
                                     </div>
                                     
-                                    {/* Phone Number */}
                                     <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
                                         <label style={labelStyle}>Phone Number</label>
                                         <input
@@ -875,7 +858,6 @@ export default function Profile() {
                                     </div>
                                 </div>
 
-                                {/* Address (full width) */}
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                                     <label style={labelStyle}>Address</label>
                                     <input
@@ -887,7 +869,6 @@ export default function Profile() {
                                     />
                                 </div>
 
-                                {/* Save Button */}
                                 <button
                                     onClick={handleSave}
                                     disabled={isSaving}
@@ -989,7 +970,7 @@ export default function Profile() {
                         title: "Remove Reservation",
                         message: "Are you sure you want to remove this reservation?",
                         confirmText: "Yes, Remove",
-                        useLogoutStyle: false, // Use the default style for other confirmations
+                        useLogoutStyle: false,
                         onConfirm: async () => {
                             setModal({ ...modal, isOpen: false });
                             try {
@@ -1075,7 +1056,7 @@ export default function Profile() {
                                             <button
                                                 onClick={() => handleAddReservationToCart(res)}
                                                 style={{
-                                                    flex: 1,
+                                                    width: '100px',
                                                     padding: '8px',
                                                     backgroundColor: "#00B4D8",
                                                     color: styles.white,
@@ -1083,7 +1064,8 @@ export default function Profile() {
                                                     borderRadius: '5px',
                                                     cursor: 'pointer',
                                                     fontWeight: '500',
-                                                    fontSize: '13px'
+                                                    fontSize: '13px',
+                                                    textAlign: 'center',
                                                 }}
                                             >
                                                 Add to Cart
@@ -1091,7 +1073,7 @@ export default function Profile() {
                                             <button
                                                 onClick={() => handleRemoveReservation(res.reservation_id)}
                                                 style={{
-                                                    flex: 1,
+                                                    width: '100px',
                                                     padding: '8px',
                                                     backgroundColor: styles.white,
                                                     color: styles.dangerRed,
@@ -1099,7 +1081,8 @@ export default function Profile() {
                                                     borderRadius: '5px',
                                                     cursor: 'pointer',
                                                     fontWeight: '500',
-                                                    fontSize: '13px'
+                                                    fontSize: '13px',
+                                                    textAlign: 'center',
                                                 }}
                                             >
                                                 Remove
@@ -1166,7 +1149,6 @@ export default function Profile() {
             />
             <div style={styles.contentWrapper}>
                 
-                {/* --- Sidebar Menu (Now using the extracted component) --- */}
                 <ProfileSidebar
                     accountInfo={accountInfo}
                     activeMenu={activeMenu}
@@ -1174,7 +1156,6 @@ export default function Profile() {
                     handleLogout={handleLogout}
                 />
 
-                {/* --- Content Area --- */}
                 <div style={styles.contentArea}>
                     {renderContent()}
                 </div>

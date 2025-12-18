@@ -3,8 +3,9 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../backend/firebase.js";
 import { useNavigate } from "react-router-dom";
 
-const PRIMARY_COLOR = "#00B4D8";
+const PRIMARY_COLOR = "#29ABE2"; 
 const TEXT_COLOR = "#202020";
+const FONT_FAMILY = "'Poppins', sans-serif";
 
 export default function Login() {
     const [email, setEmail] = useState("");
@@ -32,6 +33,14 @@ export default function Login() {
 
     return (
         <div style={styles.page}>
+            <style>
+                {`
+                @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+                * { font-family: ${FONT_FAMILY} !important; }
+                input::placeholder { font-family: ${FONT_FAMILY}; color: #aaa; }
+                `}
+            </style>
+
             <div style={styles.card}>
 
                 {/* LEFT FORM */}
@@ -62,7 +71,7 @@ export default function Login() {
 
                         <div style={styles.rowBetween}>
                             <label style={styles.rememberRow}>
-                                <input type="checkbox" />
+                                <input type="checkbox" style={{ accentColor: PRIMARY_COLOR }} />
                                 <span style={{ marginLeft: 6 }}>Remember Password</span>
                             </label>
                             <a href="/forgot" style={styles.forgot}>
@@ -85,7 +94,7 @@ export default function Login() {
                     </p>
 
                     <div style={styles.orLine}>
-                        <span>Or Login With</span>
+                        <span style={styles.orText}>Or Login With</span>
                     </div>
 
                     <div style={styles.socialRow}>
@@ -130,16 +139,18 @@ export default function Login() {
 
 const styles = {
     page: {
-        width: "97%",
-        height: "100vh",
-        background: "#ffffffff",
+        width: "100%",
+        minHeight: "100vh",
+        background: "#fff",
         display: "flex",
-        justifyContent: "center",
+        flexDirection: "column",
         alignItems: "center",
-        padding: 20,
+        paddingTop: "100px", // Increased padding on top
+        paddingBottom: "60px",
+        boxSizing: "border-box"
     },
     card: {
-        width: "88%",
+        width: "90%",
         maxWidth: "1100px",
         display: "flex",
         padding: "40px 50px",
@@ -148,56 +159,76 @@ const styles = {
     },
     left: { width: "45%" },
     right: { width: "50%", display: "flex", justifyContent: "center" },
-    title: { fontSize: 32, fontWeight: 800, marginBottom: 20, color: TEXT_COLOR },
+    title: { 
+        fontSize: 36, 
+        fontWeight: 700, 
+        marginBottom: 25, 
+        color: TEXT_COLOR,
+        letterSpacing: "-0.5px"
+    },
     form: { width: "100%" },
-    inputGroup: { width: "100%", marginBottom: 15 },
+    inputGroup: { width: "100%", marginBottom: 18 },
     input: {
         width: "100%",
-        padding: "14px 16px",
-        borderRadius: 10,
-        border: "2px solid #bdeeff",
+        padding: "16px 20px",
+        borderRadius: 12,
+        border: "1.5px solid #E5E7EB",
         outline: "none",
-        fontSize: 16,
+        fontSize: 15,
         color: TEXT_COLOR,
         boxSizing: "border-box",
+        backgroundColor: "#F9FAFB"
     },
     rowBetween: {
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: 15,
+        marginBottom: 20,
     },
-    rememberRow: { display: "flex", alignItems: "center", fontSize: 14, color: TEXT_COLOR },
-    forgot: { fontSize: 14, color: PRIMARY_COLOR, textDecoration: "none" },
+    rememberRow: { display: "flex", alignItems: "center", fontSize: 13, color: "#666" },
+    forgot: { fontSize: 13, color: PRIMARY_COLOR, textDecoration: "none", fontWeight: 500 },
     loginBtn: {
         width: "100%",
-        padding: "14px",
+        padding: "16px",
         background: PRIMARY_COLOR,
         color: "#fff",
-        borderRadius: 10,
+        borderRadius: 12,
         border: "none",
         cursor: "pointer",
         fontSize: 16,
-        fontWeight: "bold",
+        fontWeight: 600,
         marginTop: 10,
+        boxShadow: "0 4px 12px rgba(41, 171, 226, 0.2)"
     },
-    error: { color: "red", fontSize: 14, marginBottom: 10 },
-    noAccount: { marginTop: 15, fontSize: 14, color: TEXT_COLOR },
+    error: { color: "#ff4d4f", fontSize: 13, marginBottom: 10, fontWeight: 500 },
+    noAccount: { marginTop: 20, fontSize: 14, color: "#666" },
     registerLink: { color: PRIMARY_COLOR, textDecoration: "none", fontWeight: 600 },
-    orLine: { textAlign: "center", margin: "15px 0", fontSize: 14, color: "#777" },
-    socialRow: { display: "flex", gap: 12, justifyContent: "center" },
+    orLine: { 
+        position: "relative",
+        textAlign: "center", 
+        margin: "25px 0", 
+        fontSize: 13, 
+        color: "#aaa",
+    },
+    orText: {
+        background: "#fff",
+        padding: "0 10px",
+        position: "relative",
+        zIndex: 1
+    },
+    socialRow: { display: "flex", gap: 15, justifyContent: "center" },
     socialBtn: {
-        height: 45,
-        width: 45,
-        borderRadius: 10,
-        border: "1px solid #ddd",
+        height: 50,
+        width: 50,
+        borderRadius: 12,
+        border: "1px solid #E5E7EB",
         background: "#fff",
         cursor: "pointer",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: 5,
+        padding: 10,
     },
-    socialIcon: { width: "70%", height: "70%", objectFit: "contain" },
-    illustration: { width: "90%", maxWidth: 420 },
+    socialIcon: { width: "100%", height: "100%", objectFit: "contain" },
+    illustration: { width: "100%", maxWidth: 450 },
 };

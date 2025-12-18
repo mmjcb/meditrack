@@ -26,52 +26,65 @@ const steps = [
   },
 ];
 
-export default function Contact() {
+export default function About() {
   return (
     <div style={styles.pageWrapper}>
-      {/* Header Section */}
-      <section style={styles.headerSection}>
-        <div style={styles.headerTextWrapper}>
-          <h2 style={styles.headerTitle}>
-            Get to know <img src={MediTrackLogo} alt="MediTrack+ Logo" style={styles.logo} /> MediTrack+
-          </h2>
-          <p style={styles.headerDescription}>
-            <strong style={styles.highlight}>MediTrack+</strong> is a web-based application that helps users locate essential medicines quickly and easily. MediTrack+ bridges the gap between patients and pharmacies through a real-time, location-based medicine search system.
-          </p>
-          <button style={styles.knowMoreBtn}>Know More</button>
-        </div>
-        <div style={styles.headerImageWrapper}>
-          <img src={MockupImage} alt="MediTrack+ App Mockup" style={styles.headerImage} />
-        </div>
-      </section>
+      {/* Ensure Poppins is loaded and applied globally for this component */}
+      <style>
+        {`
+          @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+          .about-page-container * {
+            font-family: 'Poppins', sans-serif !important;
+          }
+        `}
+      </style>
 
-      <hr style={styles.divider} />
+      <div className="about-page-container">
+        {/* Header Section */}
+        <section style={styles.headerSection}>
+          <div style={styles.headerTextWrapper}>
+            <h2 style={styles.headerTitle}>
+              Get to know <img src={MediTrackLogo} alt="MediTrack+ Logo" style={styles.logo} /> MediTrack+
+            </h2>
+            <p style={styles.headerDescription}>
+              <strong style={styles.highlight}>MediTrack+</strong> is a web-based application that helps users locate essential medicines quickly and easily. MediTrack+ bridges the gap between patients and pharmacies through a real-time, location-based medicine search system.
+            </p>
+            <button style={styles.knowMoreBtn}>Know More</button>
+          </div>
+          <div style={styles.headerImageWrapper}>
+            <img src={MockupImage} alt="MediTrack+ App Mockup" style={styles.headerImage} />
+          </div>
+        </section>
 
-      {/* How It Works Section */}
-      <section style={styles.howItWorksSection}>
-        <h2 style={styles.sectionTitle}>How it Works</h2>
-        <div style={styles.stepsWrapper}>
-          {steps.map((step, index) => (
-            <div key={step.number} style={styles.stepCard}>
-              <img src={step.image} alt={step.title} style={styles.stepImage} />
-              <div style={styles.stepNumber}>{step.number}</div>
-              <h3 style={styles.stepTitle}>{step.title}</h3>
-              <p style={styles.stepDescription}>{step.description}</p>
-              {index < steps.length - 1 && <div style={styles.horizontalLine} />}
-            </div>
-          ))}
-        </div>
-      </section>
+        <hr style={styles.divider} />
+
+        {/* How It Works Section */}
+        <section style={styles.howItWorksSection}>
+          <h2 style={styles.sectionTitle}>How it Works</h2>
+          <div style={styles.stepsWrapper}>
+            {steps.map((step, index) => (
+              <div key={step.number} style={styles.stepCard}>
+                <img src={step.image} alt={step.title} style={styles.stepImage} />
+                <div style={styles.stepNumber}>{step.number}</div>
+                <h3 style={styles.stepTitle}>{step.title}</h3>
+                <p style={styles.stepDescription}>{step.description}</p>
+                {index < steps.length - 1 && <div style={styles.horizontalLine} />}
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
 
-const PRIMARY_COLOR = "#007bff";
+const PRIMARY_COLOR = "#29ABE2"; // Matches your Cart theme
 const TEXT_COLOR = "#333";
+const FONT_FAMILY = "'Poppins', sans-serif";
 
 const styles = {
   pageWrapper: {
-    fontFamily: "'Poppins', sans-serif",
+    fontFamily: FONT_FAMILY,
     color: TEXT_COLOR,
     padding: "120px 20px 40px 20px",
     maxWidth: "1200px",
@@ -95,36 +108,47 @@ const styles = {
   },
   logo: { width: "40px" },
   highlight: { color: PRIMARY_COLOR },
-  headerDescription: { fontSize: "1.1rem", lineHeight: "1.6", marginBottom: "20px" },
+  headerDescription: { 
+    fontSize: "1.1rem", 
+    lineHeight: "1.6", 
+    marginBottom: "20px",
+    fontWeight: "400" 
+  },
   knowMoreBtn: {
-    border: `1px solid ${PRIMARY_COLOR}`,
+    border: `2px solid ${PRIMARY_COLOR}`,
     background: "transparent",
     color: PRIMARY_COLOR,
-    padding: "10px 25px",
-    borderRadius: "5px",
+    padding: "12px 30px",
+    borderRadius: "50px", // Rounded to match your Cart theme
     cursor: "pointer",
+    fontWeight: "600",
+    fontFamily: FONT_FAMILY,
+    transition: "0.3s",
   },
   headerImageWrapper: { flex: "1 1 400px", display: "flex", justifyContent: "center" },
   headerImage: { maxWidth: "100%", height: "auto" },
-  divider: { border: "none", height: "1px", backgroundColor: "#ccc", margin: "40px 0" },
+  divider: { border: "none", height: "1px", backgroundColor: "#eee", margin: "40px 0" },
   howItWorksSection: { textAlign: "center", marginBottom: "60px" },
-  sectionTitle: { fontSize: "2rem", marginBottom: "50px" },
+  sectionTitle: { 
+    fontSize: "2.2rem", 
+    fontWeight: "700", 
+    marginBottom: "50px" 
+  },
 
-  // Steps Layout
   stepsWrapper: {
     display: "flex",
-    justifyContent: "center", // center steps
+    justifyContent: "center",
     alignItems: "flex-start",
     flexWrap: "nowrap",
-    gap: "80px", // spacing between steps
+    gap: "80px",
     maxWidth: "1000px",
     margin: "0 auto",
     position: "relative",
   },
 
   stepImage: { 
-    width: "300px",
-    height: "300px",
+    width: "250px",
+    height: "250px",
     objectFit: "contain",
     marginBottom: "20px"
   },
@@ -137,28 +161,36 @@ const styles = {
     maxWidth: "300px",
   },
 
-  // Remove horizontal lines
   horizontalLine: {
     display: "none",
   },
 
   stepNumber: {
-    width: "35px",
-    height: "35px",
+    width: "40px",
+    height: "40px",
     borderRadius: "50%",
     backgroundColor: PRIMARY_COLOR,
     color: "#fff",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    fontWeight: "bold",
+    fontWeight: "700",
     fontSize: "1.2rem",
-    margin: "0 auto 12px auto",
+    margin: "0 auto 15px auto",
     position: "relative",
     zIndex: 1,
   },
 
-  stepTitle: { fontSize: "1.2rem", fontWeight: "600", marginBottom: "8px" },
-  stepDescription: { fontSize: "0.95rem", color: "#666", lineHeight: "1.4" },
+  stepTitle: { 
+    fontSize: "1.3rem", 
+    fontWeight: "600", 
+    marginBottom: "10px",
+    color: "#111" 
+  },
+  stepDescription: { 
+    fontSize: "0.95rem", 
+    color: "#666", 
+    lineHeight: "1.5",
+    fontWeight: "400" 
+  },
 };
-

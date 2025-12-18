@@ -1,9 +1,11 @@
 import React from "react";
 import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from "react-icons/fa";
 
+const FONT_FAMILY = "Poppins, system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+
 export default function Footer() {
   return (
-    <footer style={styles.footer}>
+    <footer style={{ ...styles.footer, fontFamily: FONT_FAMILY }}>
       <div style={styles.container}>
         {/* About Section */}
         <div style={styles.section}>
@@ -52,7 +54,6 @@ const styles = {
     backgroundColor: "#00B4D8",
     color: "#fff",
     padding: "50px 20px 20px 20px",
-    fontFamily: "'Poppins', sans-serif",
   },
   container: {
     display: "flex",
@@ -90,9 +91,6 @@ const styles = {
     cursor: "pointer",
     transition: "all 0.2s",
     color: "#f0f0f0",
-  },
-  listItemHover: {
-    color: "#00B4D8",
   },
   socialIcons: {
     marginTop: "15px",

@@ -13,7 +13,7 @@ export default function Search() {
 
 const styles = {
   main: {
-    paddingTop: "130px",
+    paddingTop: "100px",
     minHeight: "100vh",
     backgroundColor: "#fff",
     display: "flex",

@@ -3,8 +3,9 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { getDatabase, ref, set } from "firebase/database";
 import { auth } from "../backend/firebase.js";
 
-const PRIMARY_COLOR = "#00B4D8";
+const PRIMARY_COLOR = "#29ABE2"; // Consistent with Login/About/Cart
 const TEXT_COLOR = "#202020";
+const FONT_FAMILY = "'Poppins', sans-serif";
 
 export default function Register() {
   const db = getDatabase();
@@ -32,39 +33,55 @@ export default function Register() {
       return;
     }
 
- try {
-  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-  const user = userCredential.user;
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-  const userData = {
-    uid: user.uid,
-    fname,
-    lname,
-    username,
-    email,
-    profilePic:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQt3VYVgX11z-bWzfirZ7dPKv8ymIQ9yimgQQ&s",
-    createdAt: Date.now(),
-  };
+      const userData = {
+        uid: user.uid,
+        fname,
+        lname,
+        username,
+        email,
+        profilePic:
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQt3VYVgX11z-bWzfirZ7dPKv8ymIQ9yimgQQ&s",
+        createdAt: Date.now(),
+      };
 
-  await set(ref(db, `User/${user.uid}`), userData);
+      await set(ref(db, `User/${user.uid}`), userData);
 
-  setSuccess("Registration successful! You can now log in.");
-  setFname("");
-  setLname("");
-  setUsername("");
-  setEmail("");
-  setPassword("");
-  setConfirmPassword("");
-} catch (err) {
-  console.error(err);
-  setError(err.message);
-}
+      setSuccess("Registration successful! You can now log in.");
+      setFname("");
+      setLname("");
+      setUsername("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+    } catch (err) {
+      console.error(err);
+      setError(err.message);
+    }
   };
 
   return (
     <div style={styles.page}>
-      <div style={styles.card}>
+      <style>
+        {`
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+        
+        .register-container * { 
+            font-family: ${FONT_FAMILY} !important; 
+        }
+
+        input::placeholder { 
+            font-family: ${FONT_FAMILY} !important; 
+            color: #aaa; 
+            font-size: 14px;
+        }
+        `}
+      </style>
+
+      <div className="register-container" style={styles.card}>
         {/* LEFT FORM */}
         <div style={styles.left}>
           <h2 style={styles.title}>Register</h2>
@@ -124,14 +141,14 @@ export default function Register() {
             </div>
 
             {error && <p style={styles.error}>{error}</p>}
-            {success && <p style={{ ...styles.error, color: "green" }}>{success}</p>}
+            {success && <p style={styles.success}>{success}</p>}
 
             <button type="submit" style={styles.loginBtn}>
               Register
             </button>
           </form>
 
-          <div style={{ textAlign: "center", marginTop: 15 }}>
+          <div style={styles.footerText}>
             Already have an account?{" "}
             <a href="/login" style={styles.registerLink}>
               Login
@@ -158,51 +175,60 @@ const styles = {
     minHeight: "100vh",
     background: "#fff",
     display: "flex",
-    justifyContent: "center",
-    alignItems: "flex-start",
-    padding: "100px 20px 50px 20px", // top margin for navbar, bottom smaller
+    flexDirection: "column",
+    alignItems: "center",
+    paddingTop: "100px", // Consistent top padding
+    paddingBottom: "80px",
     boxSizing: "border-box",
   },
   card: {
-    width: "88%",
+    width: "90%",
     maxWidth: "1100px",
     display: "flex",
-    padding: "40px 50px",
+    padding: "20px 50px",
     alignItems: "center",
-    justifyContent: "space-between",
-    boxShadow: "0 4px 15px rgba(0,0,0,0.05)",
-    borderRadius: 12,
-    backgroundColor: "#fff",
+    justifyContent: "space-between"
   },
   left: { width: "45%" },
   right: { width: "50%", display: "flex", justifyContent: "center" },
-  title: { fontSize: 32, fontWeight: 800, marginBottom: 20, color: TEXT_COLOR },
+  title: { 
+    fontSize: "38px", 
+    fontWeight: 700, 
+    marginBottom: "30px", 
+    color: TEXT_COLOR,
+    letterSpacing: "-1px" 
+  },
   form: { width: "100%" },
-  row: { display: "flex", marginBottom: 15 },
-  inputGroup: { width: "100%", marginBottom: 15 },
+  row: { display: "flex", marginBottom: "20px" },
+  inputGroup: { width: "100%", marginBottom: "20px" },
   input: {
     width: "100%",
-    padding: "14px 16px",
-    borderRadius: 10,
-    border: "2px solid #bdeeff",
+    padding: "16px 20px",
+    borderRadius: "12px",
+    border: "1.5px solid #EAEAEA",
     outline: "none",
-    fontSize: 16,
+    fontSize: "15px",
     color: TEXT_COLOR,
     boxSizing: "border-box",
+    backgroundColor: "#FBFBFB",
+    transition: "all 0.3s ease"
   },
   loginBtn: {
     width: "100%",
-    padding: "14px",
+    padding: "16px",
     background: PRIMARY_COLOR,
     color: "#fff",
-    borderRadius: 10,
+    borderRadius: "12px",
     border: "none",
     cursor: "pointer",
-    fontSize: 16,
-    fontWeight: "bold",
-    marginTop: 10,
+    fontSize: "16px",
+    fontWeight: 600,
+    marginTop: "10px",
+    boxShadow: "0 10px 20px rgba(41, 171, 226, 0.15)"
   },
-  error: { color: "red", fontSize: 14, marginBottom: 10 },
+  error: { color: "#E63946", fontSize: "14px", marginBottom: "15px", fontWeight: 500 },
+  success: { color: "#2D6A4F", fontSize: "14px", marginBottom: "15px", fontWeight: 500 },
+  footerText: { textAlign: "center", marginTop: "25px", fontSize: "15px", color: "#666" },
   registerLink: { color: PRIMARY_COLOR, textDecoration: "none", fontWeight: 600 },
-  illustration: { width: "90%", maxWidth: 420 },
+  illustration: { width: "100%", maxWidth: 450 },
 };

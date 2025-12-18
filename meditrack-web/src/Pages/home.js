@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import Contact from "./contact.js";
 
 const PRIMARY_COLOR = "#00B4D8"; 
-const ACCENT_COLOR = "#ADE8F4"; 
 const TEXT_COLOR = "#202020"; 
 const LIGHT_TEXT_COLOR = "#777777"; 
 const BACKGROUND_COLOR = "#f9f9f9"; 
@@ -36,14 +35,12 @@ export default function Home() {
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
         const validProducts = data.filter(item => item.product_name);
-
         const shuffled = [...validProducts].sort(() => 0.5 - Math.random());
         const randomDeals = shuffled.slice(0, 10).map(item => ({
           ...item,
           category: item.category || "Other",
           randomPrice: (Math.random() * 100 + 20).toFixed(2),
         }));
-
         setBestDeals(randomDeals);
       } catch (err) {
         console.error("Error fetching products:", err);
@@ -51,15 +48,11 @@ export default function Home() {
         setLoading(false);
       }
     };
-
     fetchProducts();
   }, []);
 
   useEffect(() => {
-    if (!navigator.geolocation) {
-      console.warn("Geolocation not supported");
-      return;
-    }
+    if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(async (pos) => {
       const { latitude, longitude } = pos.coords;
       try {
@@ -70,13 +63,21 @@ export default function Home() {
       } catch (err) {
         console.error("Error fetching nearby pharmacies:", err);
       }
-    }, err => console.error("Geolocation error:", err));
+    }, err => console.error(err));
   }, []);
 
   const categories = Object.keys(categoryIcons);
 
   return (
     <div style={styles.mainWrapper}>
+      <style>
+        {`
+          @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+          * { font-family: 'Poppins', sans-serif !important; }
+          .scroll-container::-webkit-scrollbar { display: none; }
+        `}
+      </style>
+
       <div style={styles.heroContainer}>
         <div style={styles.heroOverlay}>
           <h1 style={styles.mainText}>
@@ -85,39 +86,38 @@ export default function Home() {
           <p style={styles.subText}>
             Search, locate, and connect with trusted pharmacies near you instantly.
           </p>
-           <button
-              style={styles.ctaButton}
-              onClick={() => navigate("/search")}
-            >
-              Start Searching
-            </button>
+          <button style={styles.ctaButton} onClick={() => navigate("/search")}>
+            Start Searching
+          </button>
         </div>
       </div>
 
       <Section title="Pharmacies Near You">
-        <div style={styles.scrollContainer}>
+        <div style={styles.scrollContainer} className="scroll-container">
           {nearbyPharmacies.length === 0 ? (
             <p style={{ color: LIGHT_TEXT_COLOR }}>
-              {loading ? "Locating pharmacies using your current position..." : "No nearby pharmacies found or location is disabled."}
+              {loading ? "Locating pharmacies..." : "No nearby pharmacies found."}
             </p>
           ) : (
-            nearbyPharmacies.map(p => (
-              <PharmacyCard key={p.id || p.name} pharmacy={p} />
-            ))
+            nearbyPharmacies.map(p => <PharmacyCard key={p.id || p.name} pharmacy={p} />)
           )}
         </div>
       </Section>
 
       <Section title="Best Deals">
-        <div style={styles.scrollContainer}>
-          {loading ? <p style={{ color: LIGHT_TEXT_COLOR }}>Loading today's best deals...</p> : bestDeals.map(d => (
-            <DealCard key={d.id || d.product_name} deal={d} icon={categoryIcons[d.category] || categoryIcons["Other"]} />
-          ))}
+        <div style={styles.scrollContainer} className="scroll-container">
+          {loading ? (
+            <p style={{ color: LIGHT_TEXT_COLOR }}>Loading deals...</p>
+          ) : (
+            bestDeals.map(d => (
+              <DealCard key={d.id || d.product_name} deal={d} icon={categoryIcons[d.category] || categoryIcons["Other"]} />
+            ))
+          )}
         </div>
       </Section>
 
       <Section title="Shop by Category">
-        <div style={styles.scrollContainer}>
+        <div style={styles.scrollContainer} className="scroll-container">
           {categories.map(c => <CategoryCard key={c} title={c} image={categoryIcons[c]} />)}
         </div>
       </Section>
@@ -147,7 +147,7 @@ function PharmacyCard({ pharmacy }) {
         alt={pharmacy.name}
         style={styles.pharmacyImage}
       />
-      <div style={{ padding: "10px" }}>
+      <div style={styles.cardContent}>
         <p style={styles.cardTitle}>{pharmacy.name}</p>
         <p style={styles.cardSubtitle}>Open 24/7</p>
       </div>
@@ -159,9 +159,11 @@ function DealCard({ deal, icon }) {
   return (
     <div style={styles.dealCard}>
       <img src={icon} alt={deal.category} style={styles.dealImage} />
-      <p style={styles.cardTitle}>{deal.product_name}</p>
-      <p style={styles.dealCategory}>{deal.category}</p>
-      <p style={styles.dealPrice}>₱{deal.randomPrice}</p>
+      <div style={styles.cardContentCenter}>
+        <p style={styles.cardTitleWrap}>{deal.product_name}</p>
+        <p style={styles.dealCategory}>{deal.category}</p>
+        <p style={styles.dealPrice}>₱{deal.randomPrice}</p>
+      </div>
     </div>
   );
 }
@@ -172,8 +174,8 @@ function CategoryCard({ title, image }) {
     <div
       style={{
         ...styles.categoryCard,
-        transform: hover ? "translateY(-5px)" : "translateY(0)",
-        boxShadow: hover ? "0 10px 25px rgba(0,0,0,0.15)" : "0 6px 15px rgba(0,0,0,0.08)",
+        transform: hover ? "translateY(-8px)" : "translateY(0)",
+        boxShadow: hover ? "0 12px 30px rgba(0,0,0,0.12)" : "0 6px 15px rgba(0,0,0,0.06)",
       }}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
@@ -187,25 +189,24 @@ function CategoryCard({ title, image }) {
 const styles = {
   mainWrapper: {
     backgroundColor: BACKGROUND_COLOR,
-    fontFamily: "Poppins, sans-serif", 
     minHeight: "100vh",
   },
-  
   heroContainer: {
     backgroundImage: `url('https://t4.ftcdn.net/jpg/03/08/02/89/360_F_308028924_YwjqVGzauey7GfmckScMtIkSPJAVNkll.jpg')`,
     backgroundSize: "cover",
     backgroundPosition: "center",
-    height: "100vh", 
+    height: "85vh",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    borderBottomLeftRadius: "50px", 
-    borderBottomRightRadius: "50px",
+    borderBottomLeftRadius: "60px",
+    borderBottomRightRadius: "60px",
     overflow: "hidden",
     position: "relative",
   },
   heroOverlay: {
-    backgroundColor: "rgba(255, 255, 255, 0.5)", 
+    backgroundColor: "rgba(255, 255, 255, 0.6)",
+    backdropFilter: "blur(4px)",
     position: "absolute",
     top: 0, left: 0, right: 0, bottom: 0,
     display: "flex",
@@ -213,39 +214,36 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     textAlign: "center",
-    padding: "40px",
+    padding: "20px",
   },
   mainText: {
-    fontSize: "3rem",
+    fontSize: "3.5rem",
     fontWeight: "800",
     color: TEXT_COLOR,
-    marginBottom: "15px",
+    marginBottom: "20px",
     lineHeight: "1.1",
-    textShadow: "0 2px 4px rgba(0,0,0,0.1)",
-    paddingTop: "80px",
   },
   subText: {
-    fontSize: "1.3rem",
+    fontSize: "1.2rem",
     color: LIGHT_TEXT_COLOR,
-    marginBottom: "50px",
-    maxWidth: "800px",
+    marginBottom: "40px",
+    maxWidth: "700px",
+    fontWeight: "400",
   },
   ctaButton: {
     backgroundColor: PRIMARY_COLOR,
     color: "#fff",
-    padding: "18px 40px",
-    fontSize: "1.2rem",
+    padding: "16px 45px",
+    fontSize: "1.1rem",
     border: "none",
-    borderRadius: "30px", 
+    borderRadius: "50px",
     cursor: "pointer",
     fontWeight: "600",
-    transition: "background-color 0.3s, transform 0.1s",
-    boxShadow: `0 4px 15px rgba(0, 180, 216, 0.4)`,
-    ":hover": { backgroundColor: "#00a3c4" }
+    boxShadow: `0 8px 20px rgba(0, 180, 216, 0.3)`,
+    transition: "0.3s ease",
   },
-  
   section: {
-    padding: "60px 80px",
+    padding: "40px 5% 10px 5%",
     maxWidth: "1400px",
     margin: "0 auto",
   },
@@ -253,13 +251,13 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "30px",
+    marginBottom: "20px",
   },
   sectionTitle: {
-    fontSize: "32px",
+    fontSize: "26px",
     fontWeight: "700",
     color: TEXT_COLOR,
-    borderLeft: `5px solid ${PRIMARY_COLOR}`, 
+    borderLeft: `6px solid ${PRIMARY_COLOR}`,
     paddingLeft: "15px",
   },
   viewAllButton: {
@@ -270,95 +268,114 @@ const styles = {
     cursor: "pointer",
     fontSize: "1rem",
   },
-  
   scrollContainer: {
     display: "flex",
-    gap: "30px", 
+    gap: "20px",
     overflowX: "auto",
-    paddingBottom: "20px",
-    scrollbarWidth: "none",
-    msOverflowStyle: "none",
-    "&::-webkit-scrollbar": {
-      display: "none",
-    },
-  },
-  cardTitle: {
-    fontWeight: "700",
-    color: TEXT_COLOR,
-    marginTop: "10px",
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-  },
-  cardSubtitle: {
-    fontSize: "0.9rem",
-    color: LIGHT_TEXT_COLOR,
-    marginTop: "2px",
+    padding: "10px 5px 25px 5px",
   },
 
   pharmacyCard: {
-    minWidth: "250px", 
+    width: "280px",
+    minWidth: "280px",
     backgroundColor: CARD_BG_COLOR,
-    borderRadius: "15px",
-    boxShadow: "0 6px 15px rgba(0,0,0,0.08)",
+    borderRadius: "18px",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
     flexShrink: 0,
-    border: `1px solid ${ACCENT_COLOR}`,
     overflow: "hidden",
-    transition: "transform 0.2s",
-    cursor: "pointer",
-    ":hover": { transform: "translateY(-3px)" }
+    border: "1px solid #eee",
   },
   pharmacyImage: {
     width: "100%",
-    height: "150px", 
+    height: "150px",
     objectFit: "cover",
-    borderBottom: `1px solid ${BACKGROUND_COLOR}`,
   },
-  
+  cardContent: {
+    padding: "15px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "3px",
+  },
+  cardTitle: {
+    fontSize: "1.05rem",
+    fontWeight: "700",
+    color: TEXT_COLOR,
+    margin: 0,
+  },
+  cardSubtitle: {
+    fontSize: "0.85rem",
+    color: PRIMARY_COLOR,
+    fontWeight: "600",
+  },
+
+  /* COMPACT DEAL CARD */
   dealCard: {
-    minWidth: "200px",
+    width: "180px",
+    minWidth: "180px",
     backgroundColor: CARD_BG_COLOR,
-    borderRadius: "15px",
-    boxShadow: "0 6px 15px rgba(0,0,0,0.08)",
-    padding: "20px 15px",
-    textAlign: "center",
+    borderRadius: "18px",
+    boxShadow: "0 4px 10px rgba(0,0,0,0.04)",
+    padding: "15px", /* Tightened padding */
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center", /* Centered vertically */
     flexShrink: 0,
-    border: `1px solid ${ACCENT_COLOR}`,
-    transition: "transform 0.2s",
-    cursor: "pointer",
-    ":hover": { transform: "translateY(-3px)" }
+    border: "1px solid #f0f0f0",
   },
   dealImage: {
-    width: "70px",
-    height: "70px",
+    width: "55px", 
+    height: "55px",
     objectFit: "contain",
-    marginBottom: "10px",
-    backgroundColor: ACCENT_COLOR,
-    borderRadius: "50%",
-    padding: "10px",
+    marginBottom: "10px", /* Reduced space below image */
+  },
+  cardContentCenter: {
+    textAlign: "center",
+    width: "100%",
+    display: "flex",
+    flexDirection: "column",
+    gap: "2px", /* Minimal gap between text items */
+  },
+  cardTitleWrap: {
+    fontWeight: "700",
+    color: TEXT_COLOR,
+    fontSize: "0.88rem",
+    margin: 0,
+    display: "-webkit-box",
+    WebkitLineClamp: "2",
+    WebkitBoxOrient: "vertical",
+    overflow: "hidden",
+    lineHeight: "1.2",
+  },
+  dealCategory: {
+    fontSize: "0.72rem",
+    color: LIGHT_TEXT_COLOR,
+    fontWeight: "500",
+    margin: 0,
   },
   dealPrice: {
     color: PRIMARY_COLOR,
     fontWeight: "800",
-    fontSize: "1.3rem",
-    margin: "10px 0 0",
+    fontSize: "1.1rem",
+    marginTop: "4px",
   },
-  dealCategory: {
-    fontSize: "14px",
-    color: LIGHT_TEXT_COLOR,
-    fontWeight: "500",
-  },
-  
+
   categoryCard: {
-    minWidth: "160px", 
+    width: "160px",
+    minWidth: "160px",
+    height: "190px",
     backgroundColor: CARD_BG_COLOR,
-    borderRadius: "20px", 
-    padding: "30px 15px",
+    borderRadius: "22px",
+    padding: "15px",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
     textAlign: "center",
     flexShrink: 0,
-    border: `1px solid ${ACCENT_COLOR}`,
+    border: "1px solid #eee",
     cursor: "pointer",
-    transition: "transform 0.3s, box-shadow 0.3s",
+    transition: "0.3s ease",
   },
   categoryImage: {
     width: "60px",
@@ -369,6 +386,7 @@ const styles = {
   categoryTitle: {
     fontWeight: "700",
     color: TEXT_COLOR,
-    fontSize: "1rem",
+    fontSize: "0.95rem",
+    margin: 0,
   },
 };
